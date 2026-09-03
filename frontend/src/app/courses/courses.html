@@ -1,157 +1,290 @@
-<div class="container px-4">
-  <!-- Title Section -->
-  <div class="mb-4">
-    <h1 class="figma-title mb-1">Course Catalog</h1>
-    <p class="text-muted small mb-0">{{ filteredCourses.length }} courses available · Fall 2026</p>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container">
+
+    <a class="navbar-brand" href="#">
+      Student Course Management
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav">
+
+      <span class="navbar-toggler-icon"></span>
+
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item">
+          <a class="nav-link active" href="#">
+            Courses
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            My Courses
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            Profile
+          </a>
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+</nav>
+
+
+<div class="container mt-5">
+
+  <div class="text-center mb-4">
+
+    <h1>Course Catalog</h1>
+
+    <p>
+      Browse available courses
+    </p>
+
   </div>
 
-  <!-- Search Input -->
+
+  <!-- Search -->
+
   <div class="row mb-4">
-    <div class="col-md-5">
-      <div class="position-relative">
-        <input 
-          type="text" 
-          class="form-control figma-search ps-5 py-2" 
-          placeholder="Search by course title..." 
+
+    <div class="col-md-8 mx-auto">
+
+      <div class="input-group">
+
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by course title"
           [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearch($event)">
-        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
+          (keyup.enter)="searchCourses()"
+        >
+
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="searchCourses()">
+
+          Search
+
+        </button>
+
       </div>
+
     </div>
+
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="text-center my-5 py-5">
-    <div class="spinner-border text-dark" role="status"></div>
+
+  <!-- Loading -->
+
+  <div
+    *ngIf="isLoading"
+    class="text-center mt-5">
+
+    <div
+      class="spinner-border"
+      role="status">
+
+    </div>
+
+    <p class="mt-2">
+      Loading courses...
+    </p>
+
   </div>
 
-  <div *ngIf="!isLoading && errorMessage" class="alert alert-light border-dark text-dark" role="alert">
+
+  <!-- Error -->
+
+  <div
+    *ngIf="!isLoading && errorMessage"
+    class="alert alert-danger">
+
     {{ errorMessage }}
-    <button type="button" class="btn btn-sm btn-dark ms-2" (click)="fetchCourses()">Retry</button>
+
   </div>
 
-  <!-- Courses Cards Grid -->
-  <div *ngIf="!isLoading && !errorMessage" class="row g-4">
-    <div *ngFor="let course of filteredCourses" class="col-md-6 col-lg-6">
-      <div class="card figma-card h-100 p-4 border-0" (click)="openCourseDetails(course)" style="cursor: pointer;">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <span class="badge category-badge">{{ course.category || 'Computer Science' }}</span>
-          <span class="fw-bold price-text">${{ course.price || 299 }}</span>
-        </div>
 
-        <h3 class="course-heading mb-3">{{ course.title }}</h3>
+  <!-- Courses Cards -->
 
-        <div class="text-muted small mb-1 d-flex align-items-center gap-2">
-          <span>👤 {{ course.instructor || 'Dr. Sarah Chen' }}</span>
-        </div>
-        <div class="text-muted small mb-3 d-flex align-items-center gap-2">
-          <span>🕒 {{ course.duration || '48 hours' }}</span>
-        </div>
+  <div
+    *ngIf="!isLoading && !errorMessage"
+    class="row g-4">
 
-        <!-- Progress Bar Section -->
-        <div class="mt-auto">
-          <div class="d-flex justify-content-between small text-muted mb-1">
-            <span>{{ course.enrolled ?? 0 }}/{{ course.capacity ?? 35 }} enrolled</span>
-            <span *ngIf="(course.enrolled ?? 0) >= (course.capacity ?? 35)" class="text-dark fw-bold">Full</span>
-          </div>
-          <div class="progress figma-progress mb-3">
-            <div 
-              class="progress-bar" 
-              [ngClass]="(course.enrolled ?? 0) >= (course.capacity ?? 35) ? 'bg-danger-custom' : 'bg-primary-custom'"
-              [style.width.%]="(((course.enrolled ?? 0) / (course.capacity ?? 35)) * 100)">
-            </div>
-          </div>
+    <div
+      class="col-md-6 col-lg-4"
+      *ngFor="let course of courses">
 
-          <!-- زر التسجيل المباشر -->
-          <button
-            *ngIf="(course.enrolled ?? 0) < (course.capacity ?? 35)"
-            class="btn btn-action-primary w-100 py-2"
-            type="button"
-            disabled>
-            Enrollment coming soon
-          </button>
+      <div class="card h-100 shadow-sm">
 
-          <button 
-            *ngIf="(course.enrolled ?? 0) >= (course.capacity ?? 35)"
-            class="btn btn-full w-100 py-2" 
-            disabled>
-            Section full
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="card-body">
 
-  <!-- Details Modal -->
-  <div *ngIf="selectedCourse" class="modal fade show d-block figma-modal-backdrop" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content figma-modal border-0 p-3">
-        <div class="modal-header border-0 pb-0">
-          <div>
-            <span class="badge category-badge mb-2">{{ selectedCourse.category || 'Computer Science' }}</span>
-            <h2 class="course-heading modal-title d-block">{{ selectedCourse.title }}</h2>
-          </div>
-          <button type="button" class="btn-close" (click)="closeModal()"></button>
-        </div>
+          <h5 class="card-title">
+            {{ course.title }}
+          </h5>
 
-        <div class="modal-body">
-          <!-- Info Grid Cards -->
-          <div class="row g-2 mb-4">
-            <div class="col-3">
-              <div class="info-box p-3">
-                <small class="text-uppercase text-muted d-block fw-bold" style="font-size: 0.65rem;">INSTRUCTOR</small>
-                <strong class="small text-truncate d-block">{{ selectedCourse.instructor || 'Dr. Sarah Chen' }}</strong>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="info-box p-3">
-                <small class="text-uppercase text-muted d-block fw-bold" style="font-size: 0.65rem;">DURATION</small>
-                <strong class="small">{{ selectedCourse.duration || '48 hrs' }}</strong>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="info-box p-3">
-                <small class="text-uppercase text-muted d-block fw-bold" style="font-size: 0.65rem;">PRICE</small>
-                <strong class="small">${{ selectedCourse.price || 299 }}</strong>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="info-box p-3">
-                <small class="text-uppercase text-muted d-block fw-bold" style="font-size: 0.65rem;">CAPACITY</small>
-                <strong class="small">{{ selectedCourse.enrolled ?? 0 }}/{{ selectedCourse.capacity ?? 35 }}</strong>
-              </div>
-            </div>
-          </div>
 
-          <!-- Capacity Bar inside Modal -->
-          <div class="mb-4">
-            <div class="small text-muted mb-1">{{ selectedCourse.enrolled ?? 0 }}/{{ selectedCourse.capacity ?? 35 }} enrolled</div>
-            <div class="progress figma-progress">
-              <div 
-                class="progress-bar bg-primary-custom" 
-                [style.width.%]="(((selectedCourse.enrolled ?? 0) / (selectedCourse.capacity ?? 35)) * 100)">
-              </div>
-            </div>
-          </div>
+          <p class="card-text">
+            {{ course.description }}
+          </p>
 
-          <!-- Description -->
-          <div class="mb-4">
-            <small class="text-uppercase text-muted fw-bold d-block mb-2" style="font-size: 0.7rem;">DESCRIPTION</small>
-            <p class="text-secondary small leading-relaxed">{{ selectedCourse.description || 'No description provided.' }}</p>
-          </div>
 
-          <!-- Modal Action Buttons -->
-          <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-action-primary px-4 py-2" type="button" disabled>
-              Enrollment coming soon
+          <p>
+            <strong>Instructor:</strong>
+            {{ course.instructor }}
+          </p>
+
+
+          <p>
+            <strong>Duration:</strong>
+            {{ course.duration }}
+          </p>
+
+
+          <p>
+            <strong>Price:</strong>
+            {{ course.price }}
+          </p>
+
+
+          <p>
+            <strong>Capacity:</strong>
+            {{ course.capacity }}
+          </p>
+
+
+          <div class="d-flex gap-2">
+
+            <button
+              class="btn btn-primary"
+              type="button"
+              (click)="openCourseDetails(course)">
+
+              Details
+
             </button>
-            <button class="btn btn-link text-secondary text-decoration-none" (click)="closeModal()">Close</button>
+
+
+            <button
+              class="btn btn-success"
+              type="button"
+              (click)="enroll(course._id)">
+
+              Enroll
+
+            </button>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
+
+  <!-- No Courses -->
+
+  <div
+    *ngIf="!isLoading && !errorMessage && courses.length === 0"
+    class="alert alert-info text-center mt-4">
+
+    No courses found.
+
+  </div>
+
+</div>
+
+
+<!-- Course Details Modal -->
+
+<div
+  *ngIf="selectedCourse"
+  class="modal d-block"
+  tabindex="-1"
+  style="background-color: rgba(0,0,0,0.5);">
+
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <h5 class="modal-title">
+          {{ selectedCourse.title }}
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeCourseDetails()">
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <p>
+          <strong>Description:</strong>
+          {{ selectedCourse.description }}
+        </p>
+
+        <p>
+          <strong>Instructor:</strong>
+          {{ selectedCourse.instructor }}
+        </p>
+
+        <p>
+          <strong>Duration:</strong>
+          {{ selectedCourse.duration }}
+        </p>
+
+        <p>
+          <strong>Price:</strong>
+          {{ selectedCourse.price }}
+        </p>
+
+        <p>
+          <strong>Capacity:</strong>
+          {{ selectedCourse.capacity }}
+        </p>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeCourseDetails()">
+
+          Close
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>

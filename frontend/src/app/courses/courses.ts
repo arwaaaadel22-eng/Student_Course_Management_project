@@ -4,72 +4,154 @@ import { Course } from '../models/course.model';
 
 @Component({
   selector: 'app-courses',
+  standalone: false,
   templateUrl: './courses.html',
-  styleUrls: ['./courses.css'],
-  standalone: false
+  styleUrl: './courses.css'
 })
 export class Courses implements OnInit {
+
   courses: Course[] = [];
+
   selectedCourse: Course | null = null;
+
   searchTerm: string = '';
+
   isLoading: boolean = true;
-  errorMessage = '';
-  isSearching = false;
-  
-  constructor(private coursesService: CoursesService) { }
+
+  errorMessage: string = '';
+
+  constructor(private coursesService: CoursesService) {}
 
   ngOnInit(): void {
-    this.fetchCourses();
+    this.getCourses();
   }
 
-  fetchCourses(): void {
+  // Get All Courses
+  getCourses(): void {
+
     this.isLoading = true;
-    this.isSearching = false;
+    this.errorMessage = '';
+
     this.coursesService.getCourses().subscribe({
-      next: (data) => {
-        this.courses = data;
-        this.errorMessage = '';
+
+      next: (res) => {
+
+        console.log(res);
+
+        this.courses = res.courses;
+
         this.isLoading = false;
       },
+
       error: (err) => {
-        console.error('Error fetching courses:', err);
-        this.errorMessage = 'Unable to load courses. Please try again.';
+
+        console.log(err);
+
+        this.errorMessage = 'Failed to load courses';
+
         this.isLoading = false;
       }
+
     });
   }
 
-  onSearch(term: string): void {
-    this.searchTerm = term;
-    if (!term.trim()) {
-      this.fetchCourses();
+  // Search Courses
+  searchCourses(): void {
+
+    if (!this.searchTerm.trim()) {
+
+      this.getCourses();
+
       return;
     }
 
-    this.isSearching = true;
-    this.coursesService.searchCourses(term.trim()).subscribe({
-      next: data => {
-        this.courses = data;
-        this.errorMessage = '';
-        this.isSearching = false;
-      },
-      error: error => {
-        console.error('Error searching courses:', error);
-        this.errorMessage = 'Unable to search courses. Please try again.';
-        this.isSearching = false;
-      }
-    });
+    this.isLoading = true;
+
+    this.coursesService
+      .searchCourses(this.searchTerm)
+      .subscribe({
+
+        next: (res) => {
+
+          this.courses = res.courses;
+
+          this.isLoading = false;
+        },
+
+        error: (err) => {
+
+          console.log(err);
+
+          this.errorMessage = 'Error while searching';
+
+          this.isLoading = false;
+        }
+
+      });
   }
 
-  get filteredCourses(): Course[] {
-    return this.courses;
-  }
-
+  // Show Course Details
   openCourseDetails(course: Course): void {
-    this.selectedCourse = course;
+
+    if (!course._id) {
+      return;
+    }
+
+    this.coursesService
+      .getCourseById(course._id)
+      .subscribe({
+
+        next: (res) => {
+
+          this.selectedCourse = res.course;
+
+        },
+
+        error: (err) => {
+
+          console.log(err);
+
+        }
+
+      });
   }
 
-  closeModal(): void {
+  // Close Details
+  closeCourseDetails(): void {
+
     this.selectedCourse = null;
+
   }
+
+  // Enroll
+  enroll(courseId: string | undefined): void {
+
+    if (!courseId) {
+      return;
+    }
+
+    this.coursesService
+      .enrollInCourse(courseId)
+      .subscribe({
+
+        next: (res) => {
+
+          console.log(res);
+
+          alert('Enrolled successfully');
+
+        },
+
+        error: (err) => {
+
+          console.log(err);
+
+          alert('Error while enrolling');
+
+        }
+
+      });
+
+  }
+
 }

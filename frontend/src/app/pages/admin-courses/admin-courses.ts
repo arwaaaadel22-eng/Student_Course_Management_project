@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Course } from '../../models/course.model';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CoursesService } from '../../services/courses';
+import { Course } from '../../models/course.model';
 
 @Component({
   selector: 'app-admin-courses',
@@ -9,106 +10,189 @@ import { CoursesService } from '../../services/courses';
   styleUrl: './admin-courses.css'
 })
 export class AdminCourses implements OnInit {
-  courses: Course[] = [];
-  isLoading = true;
-  isSaving = false;
-  errorMessage = '';
-  successMessage = '';
-  editingId: string | null = null;
-  form: Course = this.emptyCourse();
 
-  constructor(private readonly coursesService: CoursesService) {}
+  courseForm!: FormGroup;
+
+  courses: Course[] = [];
+
+  selectedCourse: Course | null = null;
+
+  isEditing: boolean = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private coursesService: CoursesService
+  ) {
+
+    this.courseForm = this.fb.group({
+
+      title: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3)
+        ]
+      ],
+
+      description: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10)
+        ]
+      ],
+
+      instructor: [
+        '',
+        Validators.required
+      ],
+
+      duration: [
+        '',
+        [
+          Validators.required,
+          Validators.min(1)
+        ]
+      ],
+
+      price: [
+        '',
+        [
+          Validators.required,
+          Validators.min(0)
+        ]
+      ],
+
+      capacity: [
+        '',
+        [
+          Validators.required,
+          Validators.min(1)
+        ]
+      ]
+
+    });
+
+  }
 
   ngOnInit(): void {
-    this.loadCourses();
+    this.getCourses();
   }
 
-  loadCourses(): void {
-    this.isLoading = true;
+  // Get Courses
+  getCourses(): void {
     this.coursesService.getCourses().subscribe({
-      next: courses => {
-        this.courses = courses;
-        this.errorMessage = '';
-        this.isLoading = false;
+      next: (res: any) => {
+        this.courses = res.courses || res;
       },
-      error: error => {
-        this.errorMessage = error.error?.message || 'Unable to load courses.';
-        this.isLoading = false;
+      error: (err: any) => {
+        console.log(err);
       }
     });
   }
 
-  startCreate(): void {
-    this.editingId = null;
-    this.form = this.emptyCourse();
-    this.clearMessages();
-  }
+  // Create / Update
+  saveCourse(): void {
 
-  startEdit(course: Course): void {
-    this.editingId = course._id || null;
-    this.form = { ...course };
-    this.clearMessages();
-  }
-
-  cancelEdit(): void {
-    this.editingId = null;
-    this.form = this.emptyCourse();
-  }
-
-  save(): void {
-    this.clearMessages();
-    this.isSaving = true;
-    const request = this.editingId
-      ? this.coursesService.updateCourse(this.editingId, this.form)
-      : this.coursesService.createCourse(this.form);
-
-    request.subscribe({
-      next: course => {
-        if (this.editingId) {
-          this.courses = this.courses.map(item => item._id === course._id ? course : item);
-          this.successMessage = 'Course updated successfully.';
-        } else {
-          this.courses = [course, ...this.courses];
-          this.successMessage = 'Course created successfully.';
-        }
-        this.cancelEdit();
-        this.isSaving = false;
-      },
-      error: error => {
-        this.errorMessage = error.error?.message || 'Unable to save course.';
-        this.isSaving = false;
-      }
-    });
-  }
-
-  remove(course: Course): void {
-    if (!course._id || !confirm(`Delete "${course.title}"?`)) {
+    if (this.courseForm.invalid) {
       return;
     }
 
-    this.coursesService.deleteCourse(course._id).subscribe({
-      next: () => {
-        this.courses = this.courses.filter(item => item._id !== course._id);
-        this.successMessage = 'Course deleted successfully.';
-      },
-      error: error => this.errorMessage = error.error?.message || 'Unable to delete course.'
+    const course: Course = this.courseForm.value;
+
+    // Create
+    if (!this.isEditing) {
+      this.coursesService
+        .createCourse(course)
+        .subscribe({
+          next: (res: any) => {
+            console.log(res);
+            alert('Course created successfully');
+            this.courseForm.reset();
+            this.getCourses();
+          },
+          error: (err: any) => {
+            console.log(err);
+            alert('Error while creating course');
+          }
+        });
+      return;
+    }
+
+    // Update
+    if (this.selectedCourse?._id) {
+      this.coursesService
+        .updateCourse(
+          this.selectedCourse._id,
+          course
+        )
+        .subscribe({
+          next: (res: any) => {
+            console.log(res);
+            alert('Course updated successfully');
+            this.courseForm.reset();
+            this.selectedCourse = null;
+            this.isEditing = false;
+            this.getCourses();
+          },
+          error: (err: any) => {
+            console.log(err);
+            alert('Error while updating course');
+          }
+        });
+    }
+
+  }
+
+  // Edit
+  editCourse(course: Course): void {
+    this.isEditing = true;
+    this.selectedCourse = course;
+
+    this.courseForm.patchValue({
+      title: course.title,
+      description: course.description,
+      instructor: course.instructor,
+      duration: course.duration,
+      price: course.price,
+      capacity: course.capacity
     });
   }
 
-  private emptyCourse(): Course {
-    return {
-      title: '',
-      code: '',
-      description: '',
-      instructor: '',
-      duration: 1,
-      price: 0,
-      capacity: 1
-    };
+  // Delete
+  deleteCourse(id: string | undefined): void {
+    if (!id) {
+      return;
+    }
+
+    const confirmDelete = confirm(
+      'Are you sure you want to delete this course?'
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    this.coursesService
+      .deleteCourse(id)
+      .subscribe({
+        next: (res: any) => {
+          console.log(res);
+          alert('Course deleted successfully');
+          this.getCourses();
+        },
+        error: (err: any) => {
+          console.log(err);
+          alert('Error while deleting course');
+        }
+      });
   }
 
-  private clearMessages(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+  // Cancel Edit
+  cancelEdit(): void {
+    this.isEditing = false;
+    this.selectedCourse = null;
+    this.courseForm.reset();
   }
+
 }

@@ -1,70 +1,199 @@
-<section class="admin-page">
-  <header class="page-header">
-    <div>
-      <span class="eyebrow">Administration</span>
-      <h1>Manage courses</h1>
-      <p>Create, edit, and remove courses from the catalog.</p>
+<div class="container mt-5">
+
+  <h1 class="mb-4">
+    Admin Courses
+  </h1>
+
+
+  <!-- Course Form -->
+
+  <form
+    [formGroup]="courseForm"
+    (ngSubmit)="saveCourse()">
+
+
+    <div class="mb-3">
+
+      <label class="form-label">
+        Title
+      </label>
+
+      <input
+        type="text"
+        class="form-control"
+        formControlName="title">
+
     </div>
-    <button class="primary-button" type="button" (click)="startCreate()">New course</button>
-  </header>
 
-  <div *ngIf="successMessage" class="message success" role="status">{{ successMessage }}</div>
-  <div *ngIf="errorMessage" class="message error" role="alert">{{ errorMessage }}</div>
 
-  <div class="admin-layout">
-    <form class="course-form" (ngSubmit)="save()" #courseForm="ngForm">
-      <h2>{{ editingId ? 'Edit course' : 'Add course' }}</h2>
+    <div class="mb-3">
 
-      <label for="course-title">Title</label>
-      <input id="course-title" name="title" [(ngModel)]="form.title" required minlength="3">
+      <label class="form-label">
+        Description
+      </label>
 
-      <label for="course-description">Description</label>
-      <textarea id="course-description" name="description" [(ngModel)]="form.description"
-                required minlength="10" rows="4"></textarea>
+      <textarea
+        class="form-control"
+        formControlName="description">
+      </textarea>
 
-      <label for="course-instructor">Instructor</label>
-      <input id="course-instructor" name="instructor" [(ngModel)]="form.instructor" required>
+    </div>
 
-      <div class="form-grid">
-        <div>
-          <label for="course-duration">Duration (hours)</label>
-          <input id="course-duration" type="number" name="duration" [(ngModel)]="form.duration"
-                 required min="1">
+
+    <div class="mb-3">
+
+      <label class="form-label">
+        Instructor
+      </label>
+
+      <input
+        type="text"
+        class="form-control"
+        formControlName="instructor">
+
+    </div>
+
+
+    <div class="mb-3">
+
+      <label class="form-label">
+        Duration
+      </label>
+
+      <input
+        type="number"
+        class="form-control"
+        formControlName="duration">
+
+    </div>
+
+
+    <div class="mb-3">
+
+      <label class="form-label">
+        Price
+      </label>
+
+      <input
+        type="number"
+        class="form-control"
+        formControlName="price">
+
+    </div>
+
+
+    <div class="mb-3">
+
+      <label class="form-label">
+        Capacity
+      </label>
+
+      <input
+        type="number"
+        class="form-control"
+        formControlName="capacity">
+
+    </div>
+
+
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="courseForm.invalid">
+
+      {{ isEditing ? 'Update Course' : 'Create Course' }}
+
+    </button>
+
+
+    <button
+      *ngIf="isEditing"
+      type="button"
+      class="btn btn-secondary ms-2"
+      (click)="cancelEdit()">
+
+      Cancel
+
+    </button>
+
+  </form>
+
+
+  <hr class="my-5">
+
+
+  <!-- Courses -->
+
+  <div class="row g-4">
+
+    <div
+      class="col-md-6 col-lg-4"
+      *ngFor="let course of courses">
+
+
+      <div class="card h-100">
+
+        <div class="card-body">
+
+          <h5 class="card-title">
+            {{ course.title }}
+          </h5>
+
+
+          <p class="card-text">
+            {{ course.description }}
+          </p>
+
+
+          <p>
+            Instructor:
+            {{ course.instructor }}
+          </p>
+
+
+          <p>
+            Duration:
+            {{ course.duration }}
+          </p>
+
+
+          <p>
+            Price:
+            {{ course.price }}
+          </p>
+
+
+          <p>
+            Capacity:
+            {{ course.capacity }}
+          </p>
+
+
+          <button
+            class="btn btn-warning me-2"
+            type="button"
+            (click)="editCourse(course)">
+
+            Edit
+
+          </button>
+
+
+          <button
+            class="btn btn-danger"
+            type="button"
+            (click)="deleteCourse(course._id)">
+
+            Delete
+
+          </button>
+
         </div>
-        <div>
-          <label for="course-price">Price</label>
-          <input id="course-price" type="number" name="price" [(ngModel)]="form.price"
-                 required min="0">
-        </div>
-        <div>
-          <label for="course-capacity">Capacity</label>
-          <input id="course-capacity" type="number" name="capacity" [(ngModel)]="form.capacity"
-                 required min="1">
-        </div>
+
       </div>
 
-      <div class="form-actions">
-        <button *ngIf="editingId" type="button" class="secondary-button" (click)="cancelEdit()">Cancel</button>
-        <button type="submit" class="primary-button" [disabled]="courseForm.invalid || isSaving">
-          {{ isSaving ? 'Saving…' : (editingId ? 'Save changes' : 'Create course') }}
-        </button>
-      </div>
-    </form>
-
-    <div class="course-list">
-      <div *ngIf="isLoading" class="empty-state">Loading courses…</div>
-      <div *ngIf="!isLoading && !courses.length" class="empty-state">No courses found.</div>
-      <article *ngFor="let course of courses" class="course-row">
-        <div>
-          <h2>{{ course.title }}</h2>
-          <p>{{ course.instructor }} · {{ course.duration }} hours · ${{ course.price }}</p>
-          <small>{{ course.capacity }} places</small>
-        </div>
-        <div class="row-actions">
-          <button type="button" class="text-button" (click)="startEdit(course)">Edit</button>
-          <button type="button" class="text-button danger" (click)="remove(course)">Delete</button>
-        </div>
-      </article>
     </div>
+
   </div>
-</section>
+
+</div>

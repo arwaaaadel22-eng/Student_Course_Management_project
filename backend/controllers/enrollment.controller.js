@@ -108,8 +108,7 @@ exports.cancelEnrollment = async (req, res, next) => {
             })
         }
 
-       enrollment.status = "cancelled"
-        await enrollment.save()
+       await enrollment.deleteOne()
         
         return res.status(200).json({
             success: true,

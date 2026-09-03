@@ -19,6 +19,7 @@ export class Courses implements OnInit {
   isLoading: boolean = true;
 
   errorMessage: string = '';
+  
 
   constructor(private coursesService: CoursesService) {}
 

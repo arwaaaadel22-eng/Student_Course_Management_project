@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Enrolmentservice } from '../services/enrolmentservice';
+import { EnrollmentService } from '../services/enrolmentservice';
 import { IEnrollment } from '../models/enrollment.model';
 
 @Component({
@@ -9,46 +9,57 @@ import { IEnrollment } from '../models/enrollment.model';
   templateUrl: './mycourses.html',
 })
 export class MyCourses implements OnInit {
-  enrollments: IEnrollment[] = []
-  loading = true
-  cancellingid: string | null = null
+  enrollments: IEnrollment[] = [];
+  loading = true;
+  errorMessage = '';
+  cancellingId: string | null = null;
 
   constructor(
-    private enrollmentservice: Enrolmentservice,
+    private enrollmentService: EnrollmentService,
     private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.enrollmentservice.getmyenrollments().subscribe({
-      next: (res) => {
-        this.enrollments = res.enrollments
-        this.loading = false
-        this.cd.detectChanges()
-      },
-      error: (err) => {
-        console.log(err)
-        this.loading = false
-        this.cd.detectChanges()
-      }
-    })
+    this.getEnrollments();
   }
 
-  cancelenrollment(id: string):void {
-    if (this.cancellingid) return
-
-    this.cancellingid = id
-    this.enrollmentservice.cancelenrollment(id).subscribe({
-      next: () => {
-        
-        this.enrollments = this.enrollments.filter(e => e._id !== id)
-        this.cancellingid = null
-        this.cd.detectChanges()
+  getEnrollments(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.enrollmentService.getMyEnrollments().subscribe({
+      next: (res: { enrollments: IEnrollment[]; }) => {
+        this.enrollments = res.enrollments;
+        this.loading = false;
+        this.cd.detectChanges();
       },
-      error: (err) => {
-        console.log(err)
-        this.cancellingid = null
-        this.cd.detectChanges()
+      error: (err: any) => {
+        console.error(err);
+        this.errorMessage = 'Unable to load your courses. Please try again.';
+        this.loading = false;
+        this.cd.detectChanges();
       }
-    })
+    });
+  }
+
+  cancelEnrollment(id: string): void {
+    if (this.cancellingId) return;
+
+    const confirmed = confirm('Cancel this enrollment? This cannot be undone.');
+    if (!confirmed) return;
+
+    this.cancellingId = id;
+    this.enrollmentService.cancelEnrollment(id).subscribe({
+      next: () => {
+        this.enrollments = this.enrollments.filter(e => e._id !== id);
+        this.cancellingId = null;
+        this.cd.detectChanges();
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.errorMessage = 'Unable to cancel this enrollment. Please try again.';
+        this.cancellingId = null;
+        this.cd.detectChanges();
+      }
+    });
   }
 }

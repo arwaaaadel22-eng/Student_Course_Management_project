@@ -5,26 +5,20 @@ import { IEnrollmentResponse } from '../models/enrollment.model';
 import { Observable } from 'rxjs/internal/Observable';
 
 @Service()
-export class Enrolmentservice {
-    private http =inject(HttpClient);
-    private apiUrl = "http://127.0.0.1:3000/enrollments"
-    token = localStorage.getItem('token')
+export class EnrollmentService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://127.0.0.1:3000/enrollments';
 
-    getmyenrollments():Observable<IEnrollmentResponse> {
-       return this.http.get<IEnrollmentResponse>(`${this.apiUrl}`,
-         
-            {headers: {
-                'Authorization': `Bearer ${this.token}`
-            }
-        });
-    }
+  private authHeaders() {
+    const token = localStorage.getItem('token');
+    return { headers: { Authorization: `Bearer ${token}` } };
+  }
 
-    cancelenrollment(id: string): Observable<any> {
-        return this.http.delete<any>(`${this.apiUrl}/${id}`,
-        {headers: {
-            'Authorization': `Bearer ${this.token}`
-        }   
-        });
-    }
+  getMyEnrollments(): Observable<IEnrollmentResponse> {
+    return this.http.get<IEnrollmentResponse>(this.apiUrl, this.authHeaders());
+  }
+
+  cancelEnrollment(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`, this.authHeaders());
+  }
 }
-

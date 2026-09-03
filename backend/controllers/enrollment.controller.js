@@ -24,7 +24,7 @@ exports.enroll = async (req, res, next) => {
             return res.status(409).json({ success: false, message: "Already enrolled in this course" })
         }
 
-        // تم تنظيف تعارض Git هنا
+
         const enrollment = await Enrollment.create({ userId, courseId, status: "active" })
         return res.status(201).json({ success: true, enrollment })
     } catch (error) {

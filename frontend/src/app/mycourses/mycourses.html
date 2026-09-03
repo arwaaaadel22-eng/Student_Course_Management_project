@@ -11,35 +11,42 @@
     Loading your courses...
   </div>
 
-  <div *ngIf="!loading && enrollments.length===0" class="empty-state">
+  <div *ngIf="!loading && errorMessage" class="error-state">
+    <p>{{errorMessage}}</p>
+   
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && enrollments.length===0" class="empty-state">
     <p>You haven't enrolled in any courses yet.</p>
   </div>
 
-  <div class="course-card" *ngFor="let enrollment of enrollments">
-    <div class="course-info">
-      <h3>{{enrollment.courseId.title}}</h3>
+  <ng-container *ngIf="!loading && !errorMessage">
+    <div class="course-card" *ngFor="let enrollment of enrollments">
+      <div class="course-info">
+        <h3>{{enrollment.courseId.title}}</h3>
 
-      <div class="meta-row">
-        <span class="meta-item" *ngIf="enrollment.courseId.instructor">
-          <i class="bi bi-person"></i> {{enrollment.courseId.instructor}}
-        </span>
-        <span class="meta-item" *ngIf="enrollment.courseId.duration">
-          <i class="bi bi-clock"></i> {{enrollment.courseId.duration}}
-        </span>
-        <span class="price" *ngIf="enrollment.courseId.price !== undefined">
-          ${{enrollment.courseId.price}}
-        </span>
+        <div class="meta-row">
+          <span class="meta-item" *ngIf="enrollment.courseId.instructor">
+            <i class="bi bi-person"></i> {{enrollment.courseId.instructor}}
+          </span>
+          <span class="meta-item" *ngIf="enrollment.courseId.duration">
+            <i class="bi bi-clock"></i> {{enrollment.courseId.duration}}
+          </span>
+          <span class="price" *ngIf="enrollment.courseId.price !== undefined">
+            ${{enrollment.courseId.price}}
+          </span>
+        </div>
+
+        <p class="enrolled-date">Enrolled {{enrollment.enrolledAt | date:'MMMM d, y'}}</p>
       </div>
 
-      <p class="enrolled-date">Enrolled {{enrollment.enrolledAt | date:'MMMM d, y'}}</p>
+      <button
+        class="cancel-btn"
+        [disabled]="cancellingId===enrollment._id"
+        (click)="cancelEnrollment(enrollment._id)">
+        {{cancellingId===enrollment._id ? 'Cancelling...' : 'Cancel enrollment'}}
+      </button>
     </div>
-
-    <button
-      class="cancel-btn"
-      [disabled]="cancellingid===enrollment._id"
-      (click)="cancelenrollment(enrollment._id)">
-      {{cancellingid===enrollment._id ? 'Cancelling...' : 'Cancel enrollment'}}
-    </button>
-  </div>
+  </ng-container>
 
 </div>

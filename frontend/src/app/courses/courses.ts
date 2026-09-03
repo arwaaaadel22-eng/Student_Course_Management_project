@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CoursesService } from '../services/courses';
 import { Course } from '../models/course.model';
-import { NotificationService } from '../services/notification.service';
+
 
 @Component({
   selector: 'app-courses',
@@ -16,11 +16,11 @@ export class Courses implements OnInit {
   searchTerm: string = '';
   isLoading: boolean = true;
   errorMessage: string = '';
+  successMessage: string = '';
   enrollingId: string | null = null;
 
   constructor(
     private coursesService: CoursesService,
-    private notifications: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -112,13 +112,15 @@ export class Courses implements OnInit {
       .enrollInCourse(courseId)
       .subscribe({
         next: (res) => {
-          this.notifications.success(res?.message || 'Enrolled successfully');
+          this.successMessage = res?.message || 'Enrolled successfully';
+          this.errorMessage = '';
           this.enrollingId = null;
           this.getCourses();
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.notifications.error(err.error?.message || 'Error while enrolling');
+          this.errorMessage = err.error?.message || 'Error while enrolling';
+          this.successMessage = '';
           this.enrollingId = null;
           this.cdr.markForCheck();
         }

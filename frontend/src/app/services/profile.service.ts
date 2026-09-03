@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, throwError, timeout } from 'rxjs';
 import { AuthService, AuthUser } from './auth.service';
-import { environment } from '../../environments/environment';
 
 interface ProfileResponse {
   user: AuthUser;
@@ -12,7 +11,7 @@ interface ProfileResponse {
   providedIn: 'root'
 })
 export class ProfileService {
-  private readonly apiUrl = `${environment.apiUrl}/users`;
+  private readonly apiUrl = 'http://localhost:3000/users';
 
   constructor(
     private readonly http: HttpClient,

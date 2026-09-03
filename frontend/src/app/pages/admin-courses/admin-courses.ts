@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CoursesService } from '../../services/courses';
 import { Course } from '../../models/course.model';
-import { NotificationService } from '../../services/notification.service';
 import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
@@ -18,11 +17,12 @@ export class AdminCourses implements OnInit {
   selectedCourse: Course | null = null;
   isEditing: boolean = false;
   isSubmitting: boolean = false;
+  successMessage: string = '';
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
     private coursesService: CoursesService,
-    private notifications: NotificationService,
     private confirmService: ConfirmService,
     private cdr: ChangeDetectorRef
   ) {
@@ -48,7 +48,7 @@ export class AdminCourses implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err: any) => {
-        this.notifications.error(err.error?.message || 'Failed to fetch courses');
+        this.errorMessage = err.error?.message || 'Failed to fetch courses';
         this.cdr.markForCheck();
       }
     });
@@ -69,14 +69,16 @@ export class AdminCourses implements OnInit {
         .createCourse(course)
         .subscribe({
           next: (res: any) => {
-            this.notifications.success(res?.message || 'Course created successfully');
+            this.successMessage = res?.message || 'Course created successfully';
+            this.errorMessage = '';
             this.courseForm.reset();
             this.isSubmitting = false;
             this.getCourses();
             this.cdr.markForCheck();
           },
           error: (err: any) => {
-            this.notifications.error(err.error?.message || 'Error while creating course');
+            this.errorMessage = err.error?.message || 'Error while creating course';
+            this.successMessage = '';
             this.isSubmitting = false;
             this.cdr.markForCheck();
           }
@@ -90,7 +92,8 @@ export class AdminCourses implements OnInit {
         .updateCourse(this.selectedCourse._id, course)
         .subscribe({
           next: (res: any) => {
-            this.notifications.success(res?.message || 'Course updated successfully');
+            this.successMessage = res?.message || 'Course updated successfully';
+            this.errorMessage = '';
             this.courseForm.reset();
             this.selectedCourse = null;
             this.isEditing = false;
@@ -99,7 +102,8 @@ export class AdminCourses implements OnInit {
             this.cdr.markForCheck();
           },
           error: (err: any) => {
-            this.notifications.error(err.error?.message || 'Error while updating course');
+            this.errorMessage = err.error?.message || 'Error while updating course';
+            this.successMessage = '';
             this.isSubmitting = false;
             this.cdr.markForCheck();
           }
@@ -142,12 +146,14 @@ export class AdminCourses implements OnInit {
       .deleteCourse(id)
       .subscribe({
         next: (res: any) => {
-          this.notifications.success(res?.message || 'Course deleted successfully');
+          this.successMessage = res?.message || 'Course deleted successfully';
+          this.errorMessage = '';
           this.getCourses();
           this.cdr.markForCheck();
         },
         error: (err: any) => {
-          this.notifications.error(err.error?.message || 'Error while deleting course');
+          this.errorMessage = err.error?.message || 'Error while deleting course';
+          this.successMessage = '';
           this.cdr.markForCheck();
         }
       });

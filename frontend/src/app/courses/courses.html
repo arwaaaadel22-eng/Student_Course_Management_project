@@ -46,6 +46,13 @@
     {{ errorMessage }}
   </div>
 
+  <!-- Success -->
+  <div
+    *ngIf="successMessage"
+    class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
   <!-- Courses Cards -->
   <div
     *ngIf="!isLoading && !errorMessage"

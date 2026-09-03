@@ -16,7 +16,6 @@ import { CommonModule } from '@angular/common';
 import { Footer } from './footer/footer';
 import { Notfound } from './notfound/notfound';
 import { authInterceptor } from './services/auth.interceptor';
-import { ToastComponent } from './components/toast/toast';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog';
 
 @NgModule({
@@ -31,7 +30,6 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     MyCourses,
     Footer,
     Notfound,
-    ToastComponent,
     ConfirmDialogComponent,
   ],
 

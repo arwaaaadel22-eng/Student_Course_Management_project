@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 
 export interface AuthUser {
   id?: string;
@@ -40,7 +39,7 @@ export interface AuthResponse {
 })
 export class AuthService {
 
-  private readonly apiUrl = `${environment.apiUrl}/auth`;
+  private readonly apiUrl = 'http://localhost:3000/auth';
   private tokenKey = 'token';
   private userKey = 'user';
 

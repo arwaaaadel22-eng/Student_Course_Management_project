@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -12,11 +13,10 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminCourses } from './pages/admin-courses/admin-courses';
 import { MyCourses } from './mycourses/mycourses';
-import { CommonModule } from '@angular/common';
 import { Footer } from './footer/footer';
 import { Notfound } from './notfound/notfound';
-import { authInterceptor } from './services/auth.interceptor';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog';
+import { AuthInterceptor } from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -32,19 +32,17 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     Notfound,
     ConfirmDialogComponent,
   ],
-
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
+    HttpClientModule,
   ],
-
   providers: [
-    provideHttpClient(withInterceptors([authInterceptor]))
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
-
   bootstrap: [App],
 })
 export class AppModule {}

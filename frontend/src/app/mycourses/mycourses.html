@@ -1,0 +1,45 @@
+<div class="courses-page">
+
+  <div class="page-header">
+    <h1>My Courses</h1>
+    <p class="subtitle">
+      {{enrollments.length}} course{{enrollments.length===1 ? '' : 's'}} enrolled · sorted newest first
+    </p>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    Loading your courses...
+  </div>
+
+  <div *ngIf="!loading && enrollments.length===0" class="empty-state">
+    <p>You haven't enrolled in any courses yet.</p>
+  </div>
+
+  <div class="course-card" *ngFor="let enrollment of enrollments">
+    <div class="course-info">
+      <h3>{{enrollment.courseId.title}}</h3>
+
+      <div class="meta-row">
+        <span class="meta-item" *ngIf="enrollment.courseId.instructor">
+          <i class="bi bi-person"></i> {{enrollment.courseId.instructor}}
+        </span>
+        <span class="meta-item" *ngIf="enrollment.courseId.duration">
+          <i class="bi bi-clock"></i> {{enrollment.courseId.duration}}
+        </span>
+        <span class="price" *ngIf="enrollment.courseId.price !== undefined">
+          ${{enrollment.courseId.price}}
+        </span>
+      </div>
+
+      <p class="enrolled-date">Enrolled {{enrollment.enrolledAt | date:'MMMM d, y'}}</p>
+    </div>
+
+    <button
+      class="cancel-btn"
+      [disabled]="cancellingid===enrollment._id"
+      (click)="cancelenrollment(enrollment._id)">
+      {{cancellingid===enrollment._id ? 'Cancelling...' : 'Cancel enrollment'}}
+    </button>
+  </div>
+
+</div>

@@ -8,28 +8,15 @@ import { App } from './app';
 import { Courses } from './courses/courses';
 import { Navbar } from './components/navbar/navbar';
 import { Profile } from './pages/profile/profile';
+import { MyCourses } from './mycourses/mycourses';
 
 @NgModule({
-  declarations: [
-    App,
-    Courses,
-    Navbar,
-    Profile
-  ],
+  declarations: [App, Courses, Navbar, Profile, MyCourses],
 
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule
-  ],
+  imports: [BrowserModule, AppRoutingModule, FormsModule],
 
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideHttpClient()
-  ],
+  providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],
 
-  bootstrap: [
-    App
-  ]
+  bootstrap: [App],
 })
 export class AppModule {}

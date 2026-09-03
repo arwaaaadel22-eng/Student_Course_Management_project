@@ -1,0 +1,27 @@
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-heading">
+      <span class="eyebrow">Northfield University</span>
+      <h1>Sign in</h1>
+      <p>Access your course management account.</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="form-error" role="alert">{{ errorMessage }}</div>
+
+    <form (ngSubmit)="submit()" #loginForm="ngForm">
+      <label for="login-email">Email</label>
+      <input id="login-email" type="email" name="email" [(ngModel)]="credentials.email"
+             required email autocomplete="email">
+
+      <label for="login-password">Password</label>
+      <input id="login-password" type="password" name="password" [(ngModel)]="credentials.password"
+             required autocomplete="current-password">
+
+      <button type="submit" [disabled]="loginForm.invalid || isSubmitting">
+        {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+
+    <p class="auth-switch">New here? <a routerLink="/register">Create an account</a></p>
+  </div>
+</section>

@@ -13,10 +13,9 @@ export class Courses implements OnInit {
   selectedCourse: Course | null = null;
   searchTerm: string = '';
   isLoading: boolean = true;
+  errorMessage = '';
+  isSearching = false;
   
-  // متغير لمتابعة الكورس الجاري التسجيل فيه للتحكم بالـ Loading في الزر
-  enrollingCourseId: string | null = null;
-
   constructor(private coursesService: CoursesService) { }
 
   ngOnInit(): void {
@@ -25,49 +24,45 @@ export class Courses implements OnInit {
 
   fetchCourses(): void {
     this.isLoading = true;
+    this.isSearching = false;
     this.coursesService.getCourses().subscribe({
       next: (data) => {
         this.courses = data;
+        this.errorMessage = '';
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error fetching courses:', err);
+        this.errorMessage = 'Unable to load courses. Please try again.';
         this.isLoading = false;
       }
     });
   }
 
-  // دالة لتصفية الكورسات حسب كلمة البحث في المربع
-  get filteredCourses(): Course[] {
-    if (!this.searchTerm.trim()) {
-      return this.courses;
+  onSearch(term: string): void {
+    this.searchTerm = term;
+    if (!term.trim()) {
+      this.fetchCourses();
+      return;
     }
-    return this.courses.filter(course =>
-      course.title.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-  }
 
-  // دالة طلب الانضمام للدورة (POST /enrollments)
-  enroll(courseId: string | undefined, event?: Event): void {
-    if (!courseId) return; // حماية في حال عدم وجود id
-
-    if (event) {
-      event.stopPropagation(); // منع فتح المودال عند الضغط على زر التسجيل داخل الكرت
-    }
-    
-    this.enrollingCourseId = courseId;
-
-    this.coursesService.enrollInCourse(courseId).subscribe({
-      next: (response) => {
-        alert('تم طلب الانضمام للدورة بنجاح!');
-        this.enrollingCourseId = null;
+    this.isSearching = true;
+    this.coursesService.searchCourses(term.trim()).subscribe({
+      next: data => {
+        this.courses = data;
+        this.errorMessage = '';
+        this.isSearching = false;
       },
-      error: (err) => {
-        console.error('Error enrolling in course:', err);
-        alert('حدث خطأ أثناء التسجيل، يرجى المحاولة لاحقاً.');
-        this.enrollingCourseId = null;
+      error: error => {
+        console.error('Error searching courses:', error);
+        this.errorMessage = 'Unable to search courses. Please try again.';
+        this.isSearching = false;
       }
     });
+  }
+
+  get filteredCourses(): Course[] {
+    return this.courses;
   }
 
   openCourseDetails(course: Course): void {

@@ -1,14 +1,55 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface AuthUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  age?: number;
+  role: 'student' | 'admin';
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest extends LoginRequest {
+  firstName: string;
+  lastName: string;
+  age: number;
+  role?: 'student' | 'admin';
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  token: string;
+  user: AuthUser;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
+  private readonly apiUrl = 'http://localhost:3000/auth';
   private tokenKey = 'token';
   private userKey = 'user';
 
-  setAuth(token: string, user: any): void {
+  constructor(private readonly http: HttpClient) {}
+
+  login(credentials: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials);
+  }
+
+  register(details: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, details);
+  }
+
+  setAuth(token: string, user: AuthUser): void {
     localStorage.setItem(this.tokenKey, token);
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }
@@ -17,16 +58,16 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  getUser(): any | null {
+  getUser(): AuthUser | null {
     const user = localStorage.getItem(this.userKey);
 
-    return user ? JSON.parse(user) : null;
+    return user ? JSON.parse(user) as AuthUser : null;
   }
 
   getUserId(): string | null {
     const user = this.getUser();
 
-    return user?.id || null;
+    return user ? user.id : null;
   }
 
   logout(): void {

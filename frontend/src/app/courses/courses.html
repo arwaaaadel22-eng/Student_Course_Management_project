@@ -1,31 +1,3 @@
-<!-- Top Navbar -->
-<nav class="navbar navbar-expand-lg figma-nav px-4 py-3 mb-4">
-  <div class="container-fluid">
-    <div class="d-flex align-items-center">
-      <div class="brand-icon me-2">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-      </div>
-      <div>
-        <div class="fw-bold text-white lh-1">Northfield University</div>
-        <small class="text-white-50" style="font-size: 0.75rem;">Course Enrollment</small>
-      </div>
-    </div>
-
-    <div class="mx-auto d-flex gap-2">
-      <a class="nav-link nav-btn active" href="#">Courses</a>
-      <a class="nav-link nav-btn" href="#">My Courses</a>
-      <a class="nav-link nav-btn" href="#">Profile</a>
-    </div>
-
-    <div class="d-flex align-items-center gap-3">
-      <div class="user-avatar">AR</div>
-      <a href="#" class="text-white-50 text-decoration-none small">Sign out</a>
-    </div>
-  </div>
-</nav>
-
 <div class="container px-4">
   <!-- Title Section -->
   <div class="mb-4">
@@ -41,7 +13,8 @@
           type="text" 
           class="form-control figma-search ps-5 py-2" 
           placeholder="Search by course title..." 
-          [(ngModel)]="searchTerm">
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -55,8 +28,13 @@
     <div class="spinner-border text-dark" role="status"></div>
   </div>
 
+  <div *ngIf="!isLoading && errorMessage" class="alert alert-light border-dark text-dark" role="alert">
+    {{ errorMessage }}
+    <button type="button" class="btn btn-sm btn-dark ms-2" (click)="fetchCourses()">Retry</button>
+  </div>
+
   <!-- Courses Cards Grid -->
-  <div *ngIf="!isLoading" class="row g-4">
+  <div *ngIf="!isLoading && !errorMessage" class="row g-4">
     <div *ngFor="let course of filteredCourses" class="col-md-6 col-lg-6">
       <div class="card figma-card h-100 p-4 border-0" (click)="openCourseDetails(course)" style="cursor: pointer;">
         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -88,13 +66,12 @@
           </div>
 
           <!-- زر التسجيل المباشر -->
-          <button 
+          <button
             *ngIf="(course.enrolled ?? 0) < (course.capacity ?? 35)"
-            class="btn btn-action-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-            [disabled]="enrollingCourseId === course._id"
-            (click)="enroll(course._id, $event)">
-            <span *ngIf="enrollingCourseId === course._id" class="spinner-border spinner-border-sm"></span>
-            <span>{{ enrollingCourseId === course._id ? 'Enrolling...' : 'Enroll' }}</span>
+            class="btn btn-action-primary w-100 py-2"
+            type="button"
+            disabled>
+            Enrollment coming soon
           </button>
 
           <button 
@@ -168,13 +145,8 @@
 
           <!-- Modal Action Buttons -->
           <div class="d-flex align-items-center gap-3">
-            <button 
-              *ngIf="(selectedCourse.enrolled ?? 0) < (selectedCourse.capacity ?? 35)"
-              class="btn btn-action-primary px-4 py-2"
-              [disabled]="enrollingCourseId === selectedCourse._id"
-              (click)="enroll(selectedCourse._id)">
-              <span *ngIf="enrollingCourseId === selectedCourse._id" class="spinner-border spinner-border-sm me-1"></span>
-              {{ enrollingCourseId === selectedCourse._id ? 'Enrolling...' : 'Enroll in this course' }}
+            <button class="btn btn-action-primary px-4 py-2" type="button" disabled>
+              Enrollment coming soon
             </button>
             <button class="btn btn-link text-secondary text-decoration-none" (click)="closeModal()">Close</button>
           </div>

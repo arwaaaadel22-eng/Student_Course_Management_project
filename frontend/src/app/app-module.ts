@@ -8,13 +8,19 @@ import { App } from './app';
 import { Courses } from './courses/courses';
 import { Navbar } from './components/navbar/navbar';
 import { Profile } from './pages/profile/profile';
+import { Login } from './pages/login/login';
+import { Register } from './pages/register/register';
+import { AdminCourses } from './pages/admin-courses/admin-courses';
 
 @NgModule({
   declarations: [
     App,
     Courses,
     Navbar,
-    Profile
+    Profile,
+    Login,
+    Register,
+    AdminCourses
   ],
 
   imports: [

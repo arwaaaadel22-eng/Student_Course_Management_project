@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
+import { AuthService, AuthUser } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,20 +11,22 @@ import { Component, OnInit } from '@angular/core';
 })
 export class Navbar implements OnInit {
 
-  user = {
-    firstName: '',
-    lastName: ''
-  };
+  user: AuthUser | null = null;
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
-    const name = localStorage.getItem('userName');
+    this.refreshUser();
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => this.refreshUser());
+  }
 
-    if (name) {
-      const parts = name.trim().split(' ');
-
-      this.user.firstName = parts[0] || '';
-      this.user.lastName = parts.slice(1).join(' ');
-    }
+  private refreshUser(): void {
+    this.user = this.authService.getUser();
   }
 
   getInitials(firstName: string, lastName: string): string {
@@ -36,7 +41,8 @@ export class Navbar implements OnInit {
   }
 
   signOut(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userName');
+    this.authService.logout();
+    this.user = null;
+    this.router.navigate(['/login']);
   }
 }

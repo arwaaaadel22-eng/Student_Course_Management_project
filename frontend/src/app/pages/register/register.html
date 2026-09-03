@@ -1,0 +1,48 @@
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-heading">
+      <span class="eyebrow">Northfield University</span>
+      <h1>Create account</h1>
+      <p>Register as a student to access the course catalog.</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="form-error" role="alert">{{ errorMessage }}</div>
+
+    <form (ngSubmit)="submit()" #registerForm="ngForm">
+      <div class="two-column">
+        <div>
+          <label for="first-name">First name</label>
+          <input id="first-name" type="text" name="firstName" [(ngModel)]="details.firstName"
+                 required minlength="3" autocomplete="given-name">
+        </div>
+        <div>
+          <label for="last-name">Last name</label>
+          <input id="last-name" type="text" name="lastName" [(ngModel)]="details.lastName"
+                 required minlength="3" autocomplete="family-name">
+        </div>
+      </div>
+
+      <label for="register-email">Email</label>
+      <input id="register-email" type="email" name="email" [(ngModel)]="details.email"
+             required email autocomplete="email">
+
+      <label for="register-age">Age</label>
+      <input id="register-age" type="number" name="age" [(ngModel)]="details.age"
+             required min="16" max="100">
+
+      <label for="register-password">Password</label>
+      <input id="register-password" type="password" name="password" [(ngModel)]="details.password"
+             required minlength="6" autocomplete="new-password">
+
+      <label for="confirm-password">Confirm password</label>
+      <input id="confirm-password" type="password" name="confirmPassword" [(ngModel)]="confirmPassword"
+             required autocomplete="new-password">
+
+      <button type="submit" [disabled]="registerForm.invalid || isSubmitting">
+        {{ isSubmitting ? 'Creating account…' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="auth-switch">Already registered? <a routerLink="/login">Sign in</a></p>
+  </div>
+</section>

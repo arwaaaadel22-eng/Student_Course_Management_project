@@ -14,6 +14,8 @@
     </button>
   </div>
 
+  <div *ngIf="successMessage" class="profile-message success" role="status">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="profile-message error" role="alert">{{ errorMessage }}</div>
 
   <div class="profile-card">
 
@@ -193,8 +195,7 @@
           name="age"
           [(ngModel)]="editStudent.age"
           min="16"
-          max="100"
-          disabled>
+          max="100">
 
       </div>
 

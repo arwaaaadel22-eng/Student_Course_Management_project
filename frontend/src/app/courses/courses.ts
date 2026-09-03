@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CoursesService } from '../services/courses';
 import { Course } from '../models/course.model';
 import { NotificationService } from '../services/notification.service';
@@ -20,7 +20,8 @@ export class Courses implements OnInit {
 
   constructor(
     private coursesService: CoursesService,
-    private notifications: NotificationService
+    private notifications: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   isFull(course: Course): boolean {
@@ -40,10 +41,12 @@ export class Courses implements OnInit {
       next: (res: any) => {
         this.courses = res.courses || res;
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to load courses';
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -63,10 +66,12 @@ export class Courses implements OnInit {
         next: (res: any) => {
           this.courses = res.courses || res;
           this.isLoading = false;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Error while searching';
           this.isLoading = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -82,9 +87,11 @@ export class Courses implements OnInit {
       .subscribe({
         next: (res: any) => {
           this.selectedCourse = res.course || res;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Failed to load course details';
+          this.cdr.markForCheck();
         }
       });
   }
@@ -108,10 +115,12 @@ export class Courses implements OnInit {
           this.notifications.success(res?.message || 'Enrolled successfully');
           this.enrollingId = null;
           this.getCourses();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.notifications.error(err.error?.message || 'Error while enrolling');
           this.enrollingId = null;
+          this.cdr.markForCheck();
         }
       });
   }

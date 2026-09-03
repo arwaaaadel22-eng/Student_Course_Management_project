@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
 import { AuthService, AuthUser } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
@@ -38,7 +38,8 @@ export class Profile implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly profileService: ProfileService
+    private readonly profileService: ProfileService,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,10 +54,14 @@ export class Profile implements OnInit {
     }
 
     this.profileService.getProfile(userId).subscribe({
-      next: user => this.applyUser(user),
+      next: user => {
+        this.applyUser(user);
+        this.cdr.markForCheck();
+      },
       error: error => {
         console.error('Error fetching profile:', error);
         this.errorMessage = error.error?.message || 'Unable to load your profile.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -113,10 +118,12 @@ export class Profile implements OnInit {
         this.applyUser(user);
         this.isEditing = false;
         this.successMessage = 'Profile updated successfully.';
+        this.cdr.markForCheck();
       },
       error: error => {
         console.error('Error updating profile:', error);
         this.errorMessage = error.error?.message || error.message || 'Unable to update your profile.';
+        this.cdr.markForCheck();
       }
     });
   }

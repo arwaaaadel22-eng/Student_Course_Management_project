@@ -20,7 +20,7 @@ exports.getProfile = async (req, res, next) => {
 // Update user profile (Secured)
 exports.updateProfile = async (req, res, next) => {
   try {
-    // Check if the user making the request is the owner OR an admin
+    // Check if the user making the request is the owner or an admin
     if (req.user.id !== req.params.id && req.user.role !== "admin") {
       return res.status(403).json({ success: false, message: 'Not authorized to edit this profile' });
     }

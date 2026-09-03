@@ -14,46 +14,66 @@ exports.createCourse = async (req, res, next) => {
         })
         await course.save()
         res.status(201).json({
-            msg: "course created successfully",
-            course: course
+            success: true,
+            message: "Course created successfully",
+            course
         })
     } catch (err) {
         next(err)
     }
 }
 
-// Get All Courses
+// Get All Courses (with optional pagination)
 exports.getCourses = async (req, res, next) => {
     try {
-        const courses = await Course.find()
-        res.status(200).json({
-            courses: courses
-        })
+        if (req.query.page || req.query.limit) {
+            const page = Math.max(1, parseInt(req.query.page) || 1)
+            const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20))
+            const skip = (page - 1) * limit
 
+            const [courses, total] = await Promise.all([
+                Course.find().skip(skip).limit(limit).sort({ createdAt: -1 }),
+                Course.countDocuments()
+            ])
+
+            return res.status(200).json({
+                success: true,
+                courses,
+                pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+            })
+        }
+
+        const courses = await Course.find().sort({ createdAt: -1 })
+        return res.status(200).json({
+            success: true,
+            courses
+        })
     } catch (err) {
         next(err)
     }
 }
 
-// get course by title  
+// Get courses by title (with regex sanitization)
 exports.getCoursesByTitle = async (req, res, next) => {
     try {
         const { title } = req.query
 
         if (!title) {
             return res.status(400).json({
-                msg: "title query is required"
+                success: false,
+                message: "Title query is required"
             })
         }
 
+        const escapedTitle = String(title).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
         const courses = await Course.find({
-            title: { $regex: title, $options: "i" }
+            title: { $regex: escapedTitle, $options: "i" }
         })
 
-        res.status(200).json({
-            courses: courses
+        return res.status(200).json({
+            success: true,
+            courses
         })
-
     } catch (err) {
         next(err)
     }
@@ -66,11 +86,13 @@ exports.getCourseById = async (req, res, next) => {
         const course = await Course.findById(id)
         if (!course) {
             return res.status(404).json({
-                msg: "course not found"
+                success: false,
+                message: "Course not found"
             })
         }
-        res.status(200).json({
-            course: course
+        return res.status(200).json({
+            success: true,
+            course
         })
     } catch (err) {
         next(err)
@@ -99,12 +121,14 @@ exports.updateCourse = async (req, res, next) => {
         )
         if (!course) {
             return res.status(404).json({
-                msg: "course not found"
+                success: false,
+                message: "Course not found"
             })
         }
-        res.status(200).json({
-            msg: "course updated successfully",
-            course: course
+        return res.status(200).json({
+            success: true,
+            message: "Course updated successfully",
+            course
         })
     } catch (err) {
         next(err)
@@ -118,11 +142,13 @@ exports.deleteCourse = async (req, res, next) => {
         const course = await Course.findByIdAndDelete(id)
         if (!course) {
             return res.status(404).json({
-                msg: "course not found"
+                success: false,
+                message: "Course not found"
             })
         }
-        res.status(200).json({
-            msg: "course deleted successfully"
+        return res.status(200).json({
+            success: true,
+            message: "Course deleted successfully"
         })
     } catch (err) {
         next(err)

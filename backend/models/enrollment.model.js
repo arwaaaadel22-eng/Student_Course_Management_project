@@ -30,4 +30,6 @@ const enrollmentschema = new mongoose.Schema({
 
 }, { timestamps: true })
 
+enrollmentschema.index({ userId: 1, courseId: 1 })
+
 module.exports = mongoose.model("Enrollments", enrollmentschema)

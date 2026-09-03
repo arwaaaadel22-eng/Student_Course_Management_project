@@ -1,24 +1,22 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { IEnrollmentResponse } from '../models/enrollment.model';
+import { environment } from '../../environments/environment';
 
-import { Observable } from 'rxjs/internal/Observable';
-
-@Service()
+@Injectable({
+  providedIn: 'root'
+})
 export class EnrollmentService {
-  private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:3000/enrollments';
+  private readonly apiUrl = `${environment.apiUrl}/enrollments`;
 
-  private authHeaders() {
-    const token = localStorage.getItem('token');
-    return { headers: { Authorization: `Bearer ${token}` } };
-  }
+  constructor(private readonly http: HttpClient) {}
 
   getMyEnrollments(): Observable<IEnrollmentResponse> {
-    return this.http.get<IEnrollmentResponse>(this.apiUrl, this.authHeaders());
+    return this.http.get<IEnrollmentResponse>(this.apiUrl);
   }
 
   cancelEnrollment(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`, this.authHeaders());
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }

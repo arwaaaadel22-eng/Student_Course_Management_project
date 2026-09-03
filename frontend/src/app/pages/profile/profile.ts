@@ -26,10 +26,10 @@ export class Profile implements OnInit {
   successMessage = '';
 
   student: StudentProfile = {
-    fullName: localStorage.getItem('userName') || 'Ahmed',
-    email: 'ahmed@example.com',
-    role: 'Student',
-    status: 'Active Student',
+    fullName: '',
+    email: '',
+    role: '',
+    status: '',
     phone: '',
     age: 0,
   };

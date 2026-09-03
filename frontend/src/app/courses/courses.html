@@ -1,59 +1,14 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container">
-
-   
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-
-      <ul class="navbar-nav ms-auto">
-
-        <li class="nav-item">
-          <a class="nav-link active" href="#">
-            Courses
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="#">
-            My Courses
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="#">
-            Profile
-          </a>
-        </li>
-
-      </ul>
-
-    </div>
-
-  </div>
-</nav>
-
-
 <div class="container mt-5">
 
   <div class="text-center mb-4">
-
     <h1>Course Catalog</h1>
-
-    <p>
-      Browse available courses
-    </p>
-
+    <p>Browse available courses</p>
   </div>
 
-
   <!-- Search -->
-
   <div class="row mb-4">
-
     <div class="col-md-8 mx-auto">
-
       <div class="input-group">
-
         <input
           type="text"
           class="form-control"
@@ -61,55 +16,37 @@
           [(ngModel)]="searchTerm"
           (keyup.enter)="searchCourses()"
         >
-
         <button
           class="btn btn-primary"
           type="button"
           (click)="searchCourses()">
-
           Search
-
         </button>
-
       </div>
-
     </div>
-
   </div>
 
-
   <!-- Loading -->
-
   <div
     *ngIf="isLoading"
     class="text-center mt-5">
-
     <div
       class="spinner-border"
       role="status">
-
     </div>
-
     <p class="mt-2">
       Loading courses...
     </p>
-
   </div>
 
-
   <!-- Error -->
-
   <div
     *ngIf="!isLoading && errorMessage"
     class="alert alert-danger">
-
     {{ errorMessage }}
-
   </div>
 
-
   <!-- Courses Cards -->
-
   <div
     *ngIf="!isLoading && !errorMessage"
     class="row g-4">
@@ -119,90 +56,67 @@
       *ngFor="let course of courses">
 
       <div class="card h-100 shadow-sm">
-
         <div class="card-body">
-
           <h5 class="card-title">
             {{ course.title }}
           </h5>
 
-
           <p class="card-text">
             {{ course.description }}
           </p>
-
 
           <p>
             <strong>Instructor:</strong>
             {{ course.instructor }}
           </p>
 
-
           <p>
             <strong>Duration:</strong>
-            {{ course.duration }}
+            {{ course.duration }} hours
           </p>
-
 
           <p>
             <strong>Price:</strong>
-            {{ course.price }}
+            ${{ course.price }}
           </p>
-
 
           <p>
             <strong>Capacity:</strong>
             {{ course.capacity }}
           </p>
 
-
           <div class="d-flex gap-2">
-
             <button
               class="btn btn-primary"
               type="button"
               (click)="openCourseDetails(course)">
-
               Details
-
             </button>
-
 
             <button
               class="btn btn-success"
               type="button"
-              disabled>
-
+              (click)="enroll(course._id)">
               Enroll
-
             </button>
-
           </div>
-
         </div>
-
       </div>
 
     </div>
 
   </div>
 
-
   <!-- No Courses -->
-
   <div
     *ngIf="!isLoading && !errorMessage && courses.length === 0"
     class="alert alert-info text-center mt-4">
-
     No courses found.
-
   </div>
 
 </div>
 
-
 <!-- Course Details Modal -->
-
 <div
   *ngIf="selectedCourse"
   class="modal d-block"
@@ -210,26 +124,20 @@
   style="background-color: rgba(0,0,0,0.5);">
 
   <div class="modal-dialog">
-
     <div class="modal-content">
 
       <div class="modal-header">
-
         <h5 class="modal-title">
           {{ selectedCourse.title }}
         </h5>
-
         <button
           type="button"
           class="btn-close"
           (click)="closeCourseDetails()">
         </button>
-
       </div>
 
-
       <div class="modal-body">
-
         <p>
           <strong>Description:</strong>
           {{ selectedCourse.description }}
@@ -242,37 +150,36 @@
 
         <p>
           <strong>Duration:</strong>
-          {{ selectedCourse.duration }}
+          {{ selectedCourse.duration }} hours
         </p>
 
         <p>
           <strong>Price:</strong>
-          {{ selectedCourse.price }}
+          ${{ selectedCourse.price }}
         </p>
 
         <p>
           <strong>Capacity:</strong>
           {{ selectedCourse.capacity }}
         </p>
-
       </div>
 
-
       <div class="modal-footer">
-
+        <button
+          class="btn btn-success"
+          type="button"
+          (click)="enroll(selectedCourse._id); closeCourseDetails()">
+          Enroll
+        </button>
         <button
           type="button"
           class="btn btn-secondary"
           (click)="closeCourseDetails()">
-
           Close
-
         </button>
-
       </div>
 
     </div>
-
   </div>
 
 </div>

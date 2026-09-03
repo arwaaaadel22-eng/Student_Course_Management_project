@@ -1,0 +1,20 @@
+{
+  "name": "student-course-management-workspace",
+  "version": "1.0.0",
+  "description": "Student Course Management System - Root Workspace",
+  "private": true,
+  "scripts": {
+    "start:backend": "npm --prefix backend start",
+    "dev:backend": "npm --prefix backend run dev",
+    "start:frontend": "npm --prefix frontend start",
+    "build:frontend": "npm --prefix frontend run build"
+  },
+  "keywords": [
+    "student-course-management",
+    "angular",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC"
+}

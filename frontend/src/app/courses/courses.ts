@@ -8,7 +8,7 @@ import { Course } from '../models/course.model';
   templateUrl: './courses.html',
   styleUrl: './courses.css'
 })
-class Courses implements OnInit {
+export class Courses implements OnInit {
 
   courses: Course[] = [];
   selectedCourse: Course | null = null;
@@ -29,14 +29,11 @@ class Courses implements OnInit {
 
     this.coursesService.getCourses().subscribe({
       next: (res: any) => {
-        console.log("API Response:", res);
-        // مرونة تامة لتقبل البيانات سواء كانت راجعة في كائن أو مصفوفة مباشرة
         this.courses = res.courses || res;
         this.isLoading = false;
       },
       error: (err) => {
-        console.log(err);
-        this.errorMessage = 'Failed to load courses';
+        this.errorMessage = err.error?.message || 'Failed to load courses';
         this.isLoading = false;
       }
     });
@@ -59,8 +56,7 @@ class Courses implements OnInit {
           this.isLoading = false;
         },
         error: (err) => {
-          console.log(err);
-          this.errorMessage = 'Error while searching';
+          this.errorMessage = err.error?.message || 'Error while searching';
           this.isLoading = false;
         }
       });
@@ -79,7 +75,7 @@ class Courses implements OnInit {
           this.selectedCourse = res.course || res;
         },
         error: (err) => {
-          console.log(err);
+          this.errorMessage = err.error?.message || 'Failed to load course details';
         }
       });
   }
@@ -99,12 +95,10 @@ class Courses implements OnInit {
       .enrollInCourse(courseId)
       .subscribe({
         next: (res) => {
-          console.log(res);
-          alert('Enrolled successfully');
+          alert(res?.message || 'Enrolled successfully');
         },
         error: (err) => {
-          console.log(err);
-          alert('Error while enrolling');
+          alert(err.error?.message || 'Error while enrolling');
         }
       });
   }

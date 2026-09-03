@@ -1,199 +1,118 @@
-<div class="container mt-5">
-
-  <h1 class="mb-4">
-    Admin Courses
-  </h1>
-
-
-  <!-- Course Form -->
-
-  <form
-    [formGroup]="courseForm"
-    (ngSubmit)="saveCourse()">
-
-
-    <div class="mb-3">
-
-      <label class="form-label">
-        Title
-      </label>
-
-      <input
-        type="text"
-        class="form-control"
-        formControlName="title">
-
+<div class="admin-page">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Administration</span>
+      <h1>Manage Courses</h1>
+      <p>Create, update, and manage the curriculum courses.</p>
     </div>
-
-
-    <div class="mb-3">
-
-      <label class="form-label">
-        Description
-      </label>
-
-      <textarea
-        class="form-control"
-        formControlName="description">
-      </textarea>
-
-    </div>
-
-
-    <div class="mb-3">
-
-      <label class="form-label">
-        Instructor
-      </label>
-
-      <input
-        type="text"
-        class="form-control"
-        formControlName="instructor">
-
-    </div>
-
-
-    <div class="mb-3">
-
-      <label class="form-label">
-        Duration
-      </label>
-
-      <input
-        type="number"
-        class="form-control"
-        formControlName="duration">
-
-    </div>
-
-
-    <div class="mb-3">
-
-      <label class="form-label">
-        Price
-      </label>
-
-      <input
-        type="number"
-        class="form-control"
-        formControlName="price">
-
-    </div>
-
-
-    <div class="mb-3">
-
-      <label class="form-label">
-        Capacity
-      </label>
-
-      <input
-        type="number"
-        class="form-control"
-        formControlName="capacity">
-
-    </div>
-
-
-    <button
-      type="submit"
-      class="btn btn-primary"
-      [disabled]="courseForm.invalid">
-
-      {{ isEditing ? 'Update Course' : 'Create Course' }}
-
-    </button>
-
-
-    <button
-      *ngIf="isEditing"
-      type="button"
-      class="btn btn-secondary ms-2"
-      (click)="cancelEdit()">
-
-      Cancel
-
-    </button>
-
-  </form>
-
-
-  <hr class="my-5">
-
-
-  <!-- Courses -->
-
-  <div class="row g-4">
-
-    <div
-      class="col-md-6 col-lg-4"
-      *ngFor="let course of courses">
-
-
-      <div class="card h-100">
-
-        <div class="card-body">
-
-          <h5 class="card-title">
-            {{ course.title }}
-          </h5>
-
-
-          <p class="card-text">
-            {{ course.description }}
-          </p>
-
-
-          <p>
-            Instructor:
-            {{ course.instructor }}
-          </p>
-
-
-          <p>
-            Duration:
-            {{ course.duration }}
-          </p>
-
-
-          <p>
-            Price:
-            {{ course.price }}
-          </p>
-
-
-          <p>
-            Capacity:
-            {{ course.capacity }}
-          </p>
-
-
-          <button
-            class="btn btn-warning me-2"
-            type="button"
-            (click)="editCourse(course)">
-
-            Edit
-
-          </button>
-
-
-          <button
-            class="btn btn-danger"
-            type="button"
-            (click)="deleteCourse(course._id)">
-
-            Delete
-
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
   </div>
 
+  <div class="admin-layout">
+    <!-- Course Form -->
+    <div class="course-form">
+      <h2>{{ isEditing ? 'Edit Course' : 'Create Course' }}</h2>
+
+      <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
+        <div>
+          <label>Title</label>
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Course Title">
+        </div>
+
+        <div>
+          <label>Description</label>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Course Description"></textarea>
+        </div>
+
+        <div>
+          <label>Instructor</label>
+          <input
+            type="text"
+            formControlName="instructor"
+            placeholder="Instructor Name">
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label>Duration (hrs)</label>
+            <input
+              type="number"
+              formControlName="duration"
+              min="1">
+          </div>
+
+          <div>
+            <label>Price ($)</label>
+            <input
+              type="number"
+              formControlName="price"
+              min="0">
+          </div>
+
+          <div>
+            <label>Capacity</label>
+            <input
+              type="number"
+              formControlName="capacity"
+              min="1">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            *ngIf="isEditing"
+            type="button"
+            class="secondary-button"
+            (click)="cancelEdit()">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="courseForm.invalid">
+            {{ isEditing ? 'Update Course' : 'Create Course' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Course List -->
+    <div class="course-list">
+      <div *ngIf="courses.length === 0" class="empty-state">
+        No courses available. Create one using the form.
+      </div>
+
+      <div class="course-row" *ngFor="let course of courses">
+        <div>
+          <h2>{{ course.title }}</h2>
+          <p>{{ course.description }}</p>
+          <small>
+            Instructor: {{ course.instructor }} &bull; {{ course.duration }} hrs &bull; ${{ course.price }} &bull; Capacity: {{ course.capacity }}
+          </small>
+        </div>
+
+        <div class="row-actions">
+          <button
+            type="button"
+            class="text-button"
+            (click)="editCourse(course)">
+            Edit
+          </button>
+
+          <button
+            type="button"
+            class="text-button danger"
+            (click)="deleteCourse(course._id)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

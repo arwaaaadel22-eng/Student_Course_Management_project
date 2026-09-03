@@ -7,14 +7,16 @@ import { Register } from './pages/register/register';
 import { AdminCourses } from './pages/admin-courses/admin-courses';
 import { MyCourses } from './mycourses/mycourses';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { Notfound } from './notfound/notfound';
+
 const routes: Routes = [
+  { path: '', redirectTo: 'courses', pathMatch: 'full' },
   { path: 'login', component: Login },
-  {path:'',component:Login},
   { path: 'register', component: Register },
   { path: 'courses', component: Courses, canActivate: [authGuard] },
   { path: 'mycourses', component: MyCourses, canActivate: [authGuard] },
-  { path: 'admin/courses', component: AdminCourses, canActivate:[authGuard] },
+  { path: 'admin/courses', component: AdminCourses, canActivate: [authGuard, adminGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: '**', component: Notfound }
 ];

@@ -7,7 +7,6 @@ router.use(authMiddleware)
 
 router.post("/", enrollmentController.enroll)
 router.get("/", enrollmentController.getMyEnrollments)
-router.get("/getall", enrollmentController.getMyEnrollments)
 router.delete("/:id", enrollmentController.cancelEnrollment)
 
 module.exports = router

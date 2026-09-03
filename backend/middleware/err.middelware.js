@@ -1,10 +1,19 @@
 const errorMiddleware = (err, req, res, next) => {
     console.error(err.stack);
     const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
+    const isValidationError = err.name === "ValidationError";
+
+    let message = "Internal Server Error";
+    if (statusCode < 500) {
+        message = err.message || message;
+    } else if (isValidationError) {
+        message = Object.values(err.errors).map(e => e.message).join(", ");
+    }
+
+    res.status(isValidationError ? 400 : statusCode).json({
         success: false,
-        message: err.message || "Internal Server Error"
-    })
-}
+        message
+    });
+};
 
 module.exports = errorMiddleware;

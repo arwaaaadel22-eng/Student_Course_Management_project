@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { EnrollmentService } from '../services/enrolmentservice';
 import { IEnrollment } from '../models/enrollment.model';
 
@@ -14,10 +14,7 @@ export class MyCourses implements OnInit {
   errorMessage = '';
   cancellingId: string | null = null;
 
-  constructor(
-    private enrollmentService: EnrollmentService,
-    private cd: ChangeDetectorRef
-  ) {}
+  constructor(private enrollmentService: EnrollmentService) {}
 
   ngOnInit(): void {
     this.getEnrollments();
@@ -30,13 +27,11 @@ export class MyCourses implements OnInit {
       next: (res: { enrollments: IEnrollment[]; }) => {
         this.enrollments = res.enrollments;
         this.loading = false;
-        this.cd.detectChanges();
       },
       error: (err: any) => {
         console.error(err);
         this.errorMessage = 'Unable to load your courses. Please try again.';
         this.loading = false;
-        this.cd.detectChanges();
       }
     });
   }
@@ -52,13 +47,11 @@ export class MyCourses implements OnInit {
       next: () => {
         this.enrollments = this.enrollments.filter(e => e._id !== id);
         this.cancellingId = null;
-        this.cd.detectChanges();
       },
       error: (err: any) => {
         console.error(err);
         this.errorMessage = 'Unable to cancel this enrollment. Please try again.';
         this.cancellingId = null;
-        this.cd.detectChanges();
       }
     });
   }

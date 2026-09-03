@@ -12,67 +12,22 @@ import { Course } from '../../models/course.model';
 export class AdminCourses implements OnInit {
 
   courseForm!: FormGroup;
-
   courses: Course[] = [];
-
   selectedCourse: Course | null = null;
-
   isEditing: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private coursesService: CoursesService
   ) {
-
     this.courseForm = this.fb.group({
-
-      title: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3)
-        ]
-      ],
-
-      description: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(10)
-        ]
-      ],
-
-      instructor: [
-        '',
-        Validators.required
-      ],
-
-      duration: [
-        '',
-        [
-          Validators.required,
-          Validators.min(1)
-        ]
-      ],
-
-      price: [
-        '',
-        [
-          Validators.required,
-          Validators.min(0)
-        ]
-      ],
-
-      capacity: [
-        '',
-        [
-          Validators.required,
-          Validators.min(1)
-        ]
-      ]
-
+      title: ['', [Validators.required, Validators.minLength(3)]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      instructor: ['', Validators.required],
+      duration: ['', [Validators.required, Validators.min(1)]],
+      price: ['', [Validators.required, Validators.min(0)]],
+      capacity: ['', [Validators.required, Validators.min(1)]]
     });
-
   }
 
   ngOnInit(): void {
@@ -86,14 +41,13 @@ export class AdminCourses implements OnInit {
         this.courses = res.courses || res;
       },
       error: (err: any) => {
-        console.log(err);
+        alert(err.error?.message || 'Failed to fetch courses');
       }
     });
   }
 
   // Create / Update
   saveCourse(): void {
-
     if (this.courseForm.invalid) {
       return;
     }
@@ -106,14 +60,12 @@ export class AdminCourses implements OnInit {
         .createCourse(course)
         .subscribe({
           next: (res: any) => {
-            console.log(res);
-            alert('Course created successfully');
+            alert(res?.message || 'Course created successfully');
             this.courseForm.reset();
             this.getCourses();
           },
           error: (err: any) => {
-            console.log(err);
-            alert('Error while creating course');
+            alert(err.error?.message || 'Error while creating course');
           }
         });
       return;
@@ -122,26 +74,20 @@ export class AdminCourses implements OnInit {
     // Update
     if (this.selectedCourse?._id) {
       this.coursesService
-        .updateCourse(
-          this.selectedCourse._id,
-          course
-        )
+        .updateCourse(this.selectedCourse._id, course)
         .subscribe({
           next: (res: any) => {
-            console.log(res);
-            alert('Course updated successfully');
+            alert(res?.message || 'Course updated successfully');
             this.courseForm.reset();
             this.selectedCourse = null;
             this.isEditing = false;
             this.getCourses();
           },
           error: (err: any) => {
-            console.log(err);
-            alert('Error while updating course');
+            alert(err.error?.message || 'Error while updating course');
           }
         });
     }
-
   }
 
   // Edit
@@ -165,10 +111,7 @@ export class AdminCourses implements OnInit {
       return;
     }
 
-    const confirmDelete = confirm(
-      'Are you sure you want to delete this course?'
-    );
-
+    const confirmDelete = confirm('Are you sure you want to delete this course?');
     if (!confirmDelete) {
       return;
     }
@@ -177,13 +120,11 @@ export class AdminCourses implements OnInit {
       .deleteCourse(id)
       .subscribe({
         next: (res: any) => {
-          console.log(res);
-          alert('Course deleted successfully');
+          alert(res?.message || 'Course deleted successfully');
           this.getCourses();
         },
         error: (err: any) => {
-          console.log(err);
-          alert('Error while deleting course');
+          alert(err.error?.message || 'Error while deleting course');
         }
       });
   }
@@ -194,5 +135,4 @@ export class AdminCourses implements OnInit {
     this.selectedCourse = null;
     this.courseForm.reset();
   }
-
 }

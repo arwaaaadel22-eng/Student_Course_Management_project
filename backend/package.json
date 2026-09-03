@@ -1,14 +1,19 @@
 {
-  "name": "school_course",
+  "name": "student-course-management-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "REST API backend for Student Course Management System",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": [],
+  "keywords": [
+    "student",
+    "course",
+    "management",
+    "express",
+    "mongodb"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -17,8 +22,11 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.4",
+    "mongoose": "^9.9.4"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.14"
   }
 }

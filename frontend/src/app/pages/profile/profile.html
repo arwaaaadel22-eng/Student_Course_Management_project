@@ -121,55 +121,33 @@
 
       <!-- Email -->
       <div class="form-group">
-
         <label>Email</label>
-
         <input
           type="email"
           name="email"
-          [(ngModel)]="editStudent.email"
-          #emailInput="ngModel"
-         disabled
-          email
-          placeholder="ahmed@example.com">
-
-        <small
-          class="error-message"
-          *ngIf="emailInput.invalid && emailInput.touched">
-
-          Please enter a valid email address.
-
-        </small>
-
+          [value]="editStudent.email"
+          disabled>
       </div>
-
 
       <!-- Age -->
       <div class="form-group">
-
         <label>Age</label>
-
         <input
           type="number"
           name="age"
           [(ngModel)]="editStudent.age"
           min="16"
           max="100">
-
       </div>
-
 
       <!-- Role -->
       <div class="form-group">
-
         <label>Role</label>
-
         <input
           type="text"
           name="role"
-          value="Student"
+          [value]="editStudent.role"
           disabled>
-
       </div>
 
 

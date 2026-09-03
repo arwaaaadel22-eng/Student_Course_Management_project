@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing-module';
@@ -15,6 +15,7 @@ import { MyCourses } from './mycourses/mycourses';
 import { CommonModule } from '@angular/common';
 import { Footer } from './footer/footer';
 import { Notfound } from './notfound/notfound';
+import { authInterceptor } from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,9 @@ import { Notfound } from './notfound/notfound';
     CommonModule,
   ],
 
-  providers: [provideHttpClient()],
+  providers: [
+    provideHttpClient(withInterceptors([authInterceptor]))
+  ],
 
   bootstrap: [App],
 })

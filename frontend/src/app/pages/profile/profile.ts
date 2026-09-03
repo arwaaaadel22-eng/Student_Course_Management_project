@@ -1,16 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { finalize } from 'rxjs';
 import { AuthService, AuthUser } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
-
-interface StudentProfile {
-  fullName: string;
-  email: string;
-  role: string;
-  status: string;
-  phone: string;
-  age: number;
-}
 
 @Component({
   selector: 'app-profile',
@@ -25,7 +15,7 @@ export class Profile implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  student: StudentProfile = {
+  student = {
     fullName: '',
     email: '',
     role: '',
@@ -37,29 +27,26 @@ export class Profile implements OnInit {
   editStudent = { ...this.student };
 
   constructor(
-    private readonly authService: AuthService,
-    private readonly profileService: ProfileService,
-    private readonly cdr: ChangeDetectorRef
+    private authService: AuthService,
+    private profileService: ProfileService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     const cachedUser = this.authService.getUser();
     if (cachedUser) {
-      this.applyUser(cachedUser);
+      this.loadUser(cachedUser);
     }
 
     const userId = this.authService.getUserId();
-    if (!userId) {
-      return;
-    }
+    if (!userId) return;
 
     this.profileService.getProfile(userId).subscribe({
       next: user => {
-        this.applyUser(user);
+        this.loadUser(user);
         this.cdr.markForCheck();
       },
       error: error => {
-        console.error('Error fetching profile:', error);
         this.errorMessage = error.error?.message || 'Unable to load your profile.';
         this.cdr.markForCheck();
       }
@@ -82,10 +69,6 @@ export class Profile implements OnInit {
   saveProfile(): void {
     this.errorMessage = '';
     this.successMessage = '';
-    if (!this.editStudent.email.includes('@')) {
-      this.errorMessage = 'Please enter a valid email address.';
-      return;
-    }
 
     const userId = this.authService.getUserId();
     if (!userId) {
@@ -93,53 +76,49 @@ export class Profile implements OnInit {
       return;
     }
 
-    if (!this.authService.getToken()) {
-      this.errorMessage = 'Your session has expired. Please sign in again.';
-      return;
-    }
+    const parts = this.editStudent.fullName.trim().split(' ');
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(' ');
 
-    const [firstName, ...lastNameParts] = this.editStudent.fullName.trim().split(/\s+/);
-    const lastName = lastNameParts.join(' ');
     if (!firstName || !lastName) {
       this.errorMessage = 'Please enter your first and last name.';
       return;
     }
 
     this.isSaving = true;
+
     this.profileService.updateProfile(userId, {
       firstName,
       lastName,
       age: this.editStudent.age,
       phone: this.editStudent.phone
-    }).pipe(
-      finalize(() => this.isSaving = false)
-    ).subscribe({
+    }).subscribe({
       next: user => {
-        this.applyUser(user);
+        this.loadUser(user);
         this.isEditing = false;
+        this.isSaving = false;
         this.successMessage = 'Profile updated successfully.';
         this.cdr.markForCheck();
       },
       error: error => {
-        console.error('Error updating profile:', error);
-        this.errorMessage = error.error?.message || error.message || 'Unable to update your profile.';
+        this.errorMessage = error.error?.message || 'Unable to update your profile.';
+        this.isSaving = false;
         this.cdr.markForCheck();
       }
     });
   }
 
-  private applyUser(user: AuthUser): void {
-    this.student = {
-      ...this.student,
-      fullName: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-      age: user.age ?? this.student.age,
-      role: user.role,
-      phone: user.phone ?? this.student.phone
-    };
+  private loadUser(user: AuthUser): void {
+    this.student.fullName = user.firstName + ' ' + user.lastName;
+    this.student.email = user.email;
+    this.student.age = user.age || 0;
+    this.student.role = user.role;
+    this.student.phone = user.phone || '';
     this.editStudent = { ...this.student };
-    localStorage.setItem('userName', this.student.fullName);
+
     const token = this.authService.getToken();
-    if (token) this.authService.setAuth(token, user);
+    if (token) {
+      this.authService.setAuth(token, user);
+    }
   }
 }

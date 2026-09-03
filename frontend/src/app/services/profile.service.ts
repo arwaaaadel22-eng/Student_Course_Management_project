@@ -1,25 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, throwError, timeout } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { AuthService, AuthUser } from './auth.service';
-
-interface ProfileResponse {
-  user: AuthUser;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-  private readonly apiUrl = 'http://localhost:3000/users';
+
+  private apiUrl = 'http://localhost:3000/users';
 
   constructor(
-    private readonly http: HttpClient,
-    private readonly authService: AuthService
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   getProfile(userId: string): Observable<AuthUser> {
-    return this.http.get<ProfileResponse>(`${this.apiUrl}/${userId}`).pipe(
+    return this.http.get<{ user: AuthUser }>(`${this.apiUrl}/${userId}`).pipe(
       map(response => response.user)
     );
   }
@@ -28,12 +25,7 @@ export class ProfileService {
     userId: string,
     changes: Pick<AuthUser, 'firstName' | 'lastName' | 'age' | 'phone'>
   ): Observable<AuthUser> {
-    if (!this.authService.getToken()) {
-      return throwError(() => new Error('Authentication token is missing. Please sign in again.'));
-    }
-
-    return this.http.put<ProfileResponse>(`${this.apiUrl}/${userId}`, changes).pipe(
-      timeout(10000),
+    return this.http.put<{ user: AuthUser }>(`${this.apiUrl}/${userId}`, changes).pipe(
       map(response => response.user)
     );
   }

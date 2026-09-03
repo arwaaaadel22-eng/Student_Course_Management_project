@@ -33,17 +33,16 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private readonly apiUrl = 'http://localhost:3000/auth';
+  private apiUrl = 'http://localhost:3000/auth';
   private tokenKey = 'token';
   private userKey = 'user';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials);
@@ -54,12 +53,11 @@ export class AuthService {
   }
 
   setAuth(token: string, user: AuthUser): void {
-    const normalizedUser = {
-      ...user,
-      id: user.id || user._id || this.getTokenUserId(token) || ''
-    };
+    if (!user.id) {
+      user.id = user._id;
+    }
     localStorage.setItem(this.tokenKey, token);
-    localStorage.setItem(this.userKey, JSON.stringify(normalizedUser));
+    localStorage.setItem(this.userKey, JSON.stringify(user));
   }
 
   getToken(): string | null {
@@ -68,23 +66,21 @@ export class AuthService {
 
   getUser(): AuthUser | null {
     const user = localStorage.getItem(this.userKey);
-
     return user ? JSON.parse(user) as AuthUser : null;
   }
 
   getUserId(): string | null {
     const user = this.getUser();
-
-    return user?.id || user?._id || this.getTokenUserId(this.getToken());
+    if (user?.id) return user.id;
+    if (user?._id) return user._id;
+    return this.getIdFromToken();
   }
 
-  private getTokenUserId(token: string | null): string | null {
-    if (!token) {
-      return null;
-    }
-
+  private getIdFromToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1])) as { id?: string };
+      const payload = JSON.parse(atob(token.split('.')[1]));
       return payload.id || null;
     } catch {
       return null;

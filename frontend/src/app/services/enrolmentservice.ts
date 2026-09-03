@@ -7,9 +7,10 @@ import { IEnrollmentResponse } from '../models/enrollment.model';
   providedIn: 'root'
 })
 export class EnrollmentService {
-  private readonly apiUrl = 'http://localhost:3000/enrollments';
 
-  constructor(private readonly http: HttpClient) {}
+  private apiUrl = 'http://localhost:3000/enrollments';
+
+  constructor(private http: HttpClient) {}
 
   getMyEnrollments(): Observable<IEnrollmentResponse> {
     return this.http.get<IEnrollmentResponse>(this.apiUrl);

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -22,19 +22,20 @@ export class Register {
   errorMessage = '';
 
   constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   submit(): void {
     this.errorMessage = '';
+
     if (this.details.password !== this.confirmPassword) {
       this.errorMessage = 'Passwords do not match.';
       return;
     }
 
     this.isSubmitting = true;
+
     this.authService.register({
       ...this.details,
       age: Number(this.details.age),
@@ -42,16 +43,12 @@ export class Register {
     }).subscribe({
       next: response => {
         this.authService.setAuth(response.token, response.user);
+        this.isSubmitting = false;
         this.router.navigate(['/courses']);
       },
       error: error => {
         this.errorMessage = error.error?.message || 'Unable to create your account.';
         this.isSubmitting = false;
-        this.cdr.markForCheck();
-      },
-      complete: () => {
-        this.isSubmitting = false;
-        this.cdr.markForCheck();
       }
     });
   }

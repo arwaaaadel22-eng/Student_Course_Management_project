@@ -1,43 +1,25 @@
-const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
-const User = require("../models/user.model")
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const User = require('../models/user.model')
 
-// A pre-computed bcrypt hash with no matching plaintext, used to keep login
-// timing constant when the email doesn't match a real account.
-const DUMMY_HASH = "$2b$12$CwTycUXWue0Thq9StjUM0uJ8Y9V3f4v7cAeXPP6cyOKUANvrxV.HW"
+const JWT_SECRET = 'my_secret_key'
 
 const createToken = (user) => {
-    if (!process.env.JWT_SECRET) {
-        throw new Error("JWT_SECRET is not configured")
-    }
-
     return jwt.sign(
         { id: user._id.toString(), role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+        JWT_SECRET,
+        { expiresIn: '7d' }
     )
 }
 
-const publicUser = (user) => ({
-    id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    age: user.age,
-    phone: user.phone,
-    role: user.role,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt
-})
-
 exports.register = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, password, age, phone } = req.body || {}
+        const { firstName, lastName, email, password, age, phone } = req.body
 
         if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "firstName, lastName, email and password are required"
+                message: 'firstName, lastName, email and password are required'
             })
         }
 
@@ -47,7 +29,7 @@ exports.register = async (req, res, next) => {
         if (existingUser) {
             return res.status(409).json({
                 success: false,
-                message: "Email is already registered"
+                message: 'Email is already registered'
             })
         }
 
@@ -59,16 +41,24 @@ exports.register = async (req, res, next) => {
             password: hashedPassword,
             age,
             phone,
-            role: "student"
+            role: 'student'
         })
 
         const token = createToken(user)
 
         return res.status(201).json({
             success: true,
-            message: "Registration successful",
+            message: 'Registration successful',
             token,
-            user: publicUser(user)
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                age: user.age,
+                phone: user.phone,
+                role: user.role
+            }
         })
     } catch (error) {
         next(error)
@@ -77,24 +67,30 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     try {
-        const { email, password } = req.body || {}
+        const { email, password } = req.body
 
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "email and password are required"
+                message: 'email and password are required'
             })
         }
 
         const user = await User.findOne({ email: email.trim().toLowerCase() })
-        // Always run a bcrypt compare, even for an unknown email, so response
-        // time doesn't reveal whether the account exists.
-        const passwordMatches = await bcrypt.compare(password, user ? user.password : DUMMY_HASH)
 
-        if (!user || !passwordMatches) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "Invalid email or password"
+                message: 'Invalid email or password'
+            })
+        }
+
+        const passwordMatches = await bcrypt.compare(password, user.password)
+
+        if (!passwordMatches) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password'
             })
         }
 
@@ -102,14 +98,19 @@ exports.login = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: "Login successful",
+            message: 'Login successful',
             token,
-            user: publicUser(user)
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                age: user.age,
+                phone: user.phone,
+                role: user.role
+            }
         })
     } catch (error) {
         next(error)
     }
 }
-
-module.exports.createToken = createToken
-module.exports.publicUser = publicUser

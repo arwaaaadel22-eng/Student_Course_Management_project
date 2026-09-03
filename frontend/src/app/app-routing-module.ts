@@ -5,22 +5,23 @@ import { Profile } from './pages/profile/profile';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminCourses } from './pages/admin-courses/admin-courses';
-
+import { MyCourses } from './mycourses/mycourses';
+import { authGuard } from './guards/auth.gaurd-guard';
+import { Notfound } from './notfound/notfound';
 const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'courses', component: Courses },
-  { path: 'admin/courses', component: AdminCourses },
+  { path: 'courses', component: Courses,  },
+  {path: 'mycourses', component: MyCourses, canActivate: [authGuard]},
+  { path: 'admin/courses', component: AdminCourses, canActivate: [authGuard] },
   {
     path: '',
-    redirectTo: 'courses',
+  redirectTo: 'register',
     pathMatch: 'full'
   },
-  {
-    path: 'profile',
-    component: Profile
+  { path: 'profile', component: Profile,canActivate: [authGuard]
   },
-  { path: '**', redirectTo: 'courses' }
+  { path: '**', component: Notfound }
 ];
 
 @NgModule({

@@ -11,6 +11,10 @@ import { Profile } from './pages/profile/profile';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminCourses } from './pages/admin-courses/admin-courses';
+import { MyCourses } from './mycourses/mycourses';
+import { CommonModule } from '@angular/common';
+import { Footer } from './footer/footer';
+import { Notfound } from './notfound/notfound';
 
 @NgModule({
   declarations: [
@@ -20,10 +24,13 @@ import { AdminCourses } from './pages/admin-courses/admin-courses';
     Profile,
     Login,
     Register,
-    AdminCourses
+    AdminCourses,
+    MyCourses,
+    Footer,
+    Notfound,
   ],
 
-  imports: [BrowserModule, AppRoutingModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, CommonModule],
 
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],
 

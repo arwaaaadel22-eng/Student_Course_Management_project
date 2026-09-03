@@ -38,6 +38,12 @@
       <input id="register-password" type="password" name="password" [(ngModel)]="details.password"
              required minlength="6" autocomplete="new-password">
 
+      <label for="register-role">Account type</label>
+      <select id="register-role" name="role" [(ngModel)]="details.role" required>
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+      </select>
+
       <label for="confirm-password">Confirm password</label>
       <input id="confirm-password" type="password" name="confirmPassword" [(ngModel)]="confirmPassword"
              required autocomplete="new-password">

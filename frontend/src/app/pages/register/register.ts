@@ -15,7 +15,8 @@ export class Register {
     email: '',
     password: '',
     age: 16,
-    phone: ''
+    phone: '',
+    role: 'student' as 'student' | 'admin'
   };
   confirmPassword = '';
   isSubmitting = false;

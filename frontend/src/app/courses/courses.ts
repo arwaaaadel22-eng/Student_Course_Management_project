@@ -8,18 +8,13 @@ import { Course } from '../models/course.model';
   templateUrl: './courses.html',
   styleUrl: './courses.css'
 })
-export class Courses implements OnInit {
+class Courses implements OnInit {
 
   courses: Course[] = [];
-
   selectedCourse: Course | null = null;
-
   searchTerm: string = '';
-
   isLoading: boolean = true;
-
   errorMessage: string = '';
-  
 
   constructor(private coursesService: CoursesService) {}
 
@@ -29,37 +24,28 @@ export class Courses implements OnInit {
 
   // Get All Courses
   getCourses(): void {
-
     this.isLoading = true;
     this.errorMessage = '';
 
     this.coursesService.getCourses().subscribe({
-
-      next: (courses) => {
-        this.courses = courses;
-
+      next: (res: any) => {
+        console.log("API Response:", res);
+        // مرونة تامة لتقبل البيانات سواء كانت راجعة في كائن أو مصفوفة مباشرة
+        this.courses = res.courses || res;
         this.isLoading = false;
       },
-
       error: (err) => {
-
         console.log(err);
-
         this.errorMessage = 'Failed to load courses';
-
         this.isLoading = false;
       }
-
     });
   }
 
   // Search Courses
   searchCourses(): void {
-
     if (!this.searchTerm.trim()) {
-
       this.getCourses();
-
       return;
     }
 
@@ -68,28 +54,20 @@ export class Courses implements OnInit {
     this.coursesService
       .searchCourses(this.searchTerm)
       .subscribe({
-
-        next: (courses) => {
-          this.courses = courses;
-
+        next: (res: any) => {
+          this.courses = res.courses || res;
           this.isLoading = false;
         },
-
         error: (err) => {
-
           console.log(err);
-
           this.errorMessage = 'Error while searching';
-
           this.isLoading = false;
         }
-
       });
   }
 
   // Show Course Details
   openCourseDetails(course: Course): void {
-
     if (!course._id) {
       return;
     }
@@ -97,26 +75,37 @@ export class Courses implements OnInit {
     this.coursesService
       .getCourseById(course._id)
       .subscribe({
-
-        next: (course) => {
-          this.selectedCourse = course;
-
+        next: (res: any) => {
+          this.selectedCourse = res.course || res;
         },
-
         error: (err) => {
-
           console.log(err);
-
         }
-
       });
   }
 
   // Close Details
   closeCourseDetails(): void {
-
     this.selectedCourse = null;
-
   }
 
+  // Enroll
+  enroll(courseId: string | undefined): void {
+    if (!courseId) {
+      return;
+    }
+
+    this.coursesService
+      .enrollInCourse(courseId)
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+          alert('Enrolled successfully');
+        },
+        error: (err) => {
+          console.log(err);
+          alert('Error while enrolling');
+        }
+      });
+  }
 }

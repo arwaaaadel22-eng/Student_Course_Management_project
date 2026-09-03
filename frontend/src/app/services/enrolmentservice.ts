@@ -7,11 +7,11 @@ import { Observable } from 'rxjs/internal/Observable';
 @Service()
 export class Enrolmentservice {
     private http =inject(HttpClient);
-    private apiurl = "http://127.0.0.1:5000"
+    private apiUrl = "http://127.0.0.1:3000/enrollments"
     token = localStorage.getItem('token')
 
     getmyenrollments():Observable<IEnrollmentResponse> {
-       return this.http.get<IEnrollmentResponse>(`${this.apiurl}/enrollments`,
+       return this.http.get<IEnrollmentResponse>(`${this.apiUrl}`,
          
             {headers: {
                 'Authorization': `Bearer ${this.token}`
@@ -20,10 +20,11 @@ export class Enrolmentservice {
     }
 
     cancelenrollment(id: string): Observable<any> {
-        return this.http.delete<any>(`${this.apiurl}/enrollments/${id}`,
+        return this.http.delete<any>(`${this.apiUrl}/${id}`,
         {headers: {
             'Authorization': `Bearer ${this.token}`
         }   
         });
     }
 }
+

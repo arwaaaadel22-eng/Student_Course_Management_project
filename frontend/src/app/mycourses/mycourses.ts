@@ -33,12 +33,13 @@ export class MyCourses implements OnInit {
     })
   }
 
-  cancelenrollment(id: string) {
+  cancelenrollment(id: string):void {
     if (this.cancellingid) return
 
     this.cancellingid = id
     this.enrollmentservice.cancelenrollment(id).subscribe({
       next: () => {
+        
         this.enrollments = this.enrollments.filter(e => e._id !== id)
         this.cancellingid = null
         this.cd.detectChanges()

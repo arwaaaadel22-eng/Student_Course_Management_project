@@ -11,15 +11,15 @@ import { Notfound } from './notfound/notfound';
 const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'courses', component: Courses,  },
-  {path: 'mycourses', component: MyCourses, canActivate: [authGuard]},
-  { path: 'admin/courses', component: AdminCourses, canActivate: [authGuard] },
+  { path: 'courses', component: Courses, },
+  {path: 'mycourses', component: MyCourses, },
+  { path: 'admin/courses', component: AdminCourses,  },
   {
     path: '',
   redirectTo: 'register',
     pathMatch: 'full'
   },
-  { path: 'profile', component: Profile,canActivate: [authGuard]
+  { path: 'profile', component: Profile,
   },
   { path: '**', component: Notfound }
 ];

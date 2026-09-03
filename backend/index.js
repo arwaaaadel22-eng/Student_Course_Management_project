@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const cors = require('cors')
 const helmet = require('helmet')
+const rateLimit = require('express-rate-limit')
 
 dotenv.config()
 
@@ -19,11 +20,17 @@ app.use(helmet())
 app.use(express.json())
 app.use(cors({ origin: 'http://localhost:4200' }))
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: { success: false, message: 'Too many attempts. Please try again later.' }
+})
+
 app.get('/', (req, res) => {
     res.json({ success: true, message: 'Student Course Management API is running' })
 })
 
-app.use('/auth', authRoutes)
+app.use('/auth', authLimiter, authRoutes)
 app.use('/users', userRoutes)
 app.use('/courses', courseRoutes)
 app.use('/enrollments', enrollmentRoutes)

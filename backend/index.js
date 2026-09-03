@@ -54,6 +54,17 @@ app.use((req, res) => {
     res.status(404).json({ success: false, message: "Route not found" })
 })
 
+// If the DB connection ever drops after startup, fail in-flight queries
+// immediately instead of buffering them forever with no timeout and no error.
+mongoose.set("bufferCommands", false)
+
+mongoose.connection.on("error", (error) => {
+    console.error("MongoDB connection error:", error.message)
+})
+mongoose.connection.on("disconnected", () => {
+    console.warn("MongoDB disconnected")
+})
+
 const startServer = async () => {
     try {
         if (!MONGO_URI) {
@@ -64,7 +75,7 @@ const startServer = async () => {
             throw new Error("JWT_SECRET is not configured in .env")
         }
 
-        await mongoose.connect(MONGO_URI)
+        await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 })
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`)
         })

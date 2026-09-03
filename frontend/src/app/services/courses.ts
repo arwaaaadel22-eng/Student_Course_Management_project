@@ -1,120 +1,68 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Course } from '../models/course.model';
+import { AuthService } from './auth.service';
+
+interface CoursesResponse {
+  courses: Course[];
+}
+
+interface CourseResponse {
+  course: Course;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CoursesService {
+  private readonly apiUrl = 'http://localhost:3000/courses';
 
-  private apiUrl = 'http://localhost:3000/courses';
-  private enrollUrl = 'http://localhost:3000/enrollments';
+  constructor(
+    private readonly http: HttpClient,
+    private readonly authService: AuthService
+  ) {}
 
-  constructor(private http: HttpClient) {}
+  getCourses(): Observable<Course[]> {
+    return this.http.get<CoursesResponse>(this.apiUrl).pipe(
+      map(response => response.courses)
+    );
+  }
 
-  private getHeaders(): HttpHeaders {
+  getCourseById(id: string): Observable<Course> {
+    return this.http.get<CourseResponse>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.course)
+    );
+  }
 
-    const token = localStorage.getItem('token');
+  searchCourses(query: string): Observable<Course[]> {
+    return this.http.get<CoursesResponse>(
+      `${this.apiUrl}/search?title=${encodeURIComponent(query)}`
+    ).pipe(map(response => response.courses));
+  }
 
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+  createCourse(course: Course): Observable<Course> {
+    return this.http.post<CourseResponse>(this.apiUrl, course, {
+      headers: this.authHeaders()
+    }).pipe(map(response => response.course));
+  }
+
+  updateCourse(id: string, course: Course): Observable<Course> {
+    return this.http.put<CourseResponse>(`${this.apiUrl}/${id}`, course, {
+      headers: this.authHeaders()
+    }).pipe(map(response => response.course));
+  }
+
+  deleteCourse(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
+      headers: this.authHeaders()
     });
-
   }
 
-
-  // Get All Courses
-  getCourses(): Observable<{ courses: Course[] }> {
-
-    return this.http.get<{ courses: Course[] }>(
-      this.apiUrl,
-      {
-        headers: this.getHeaders()
-      }
-    );
-
+  private authHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
   }
-
-
-  // Get Course By ID
-  getCourseById(id: string): Observable<{ course: Course }> {
-
-    return this.http.get<{ course: Course }>(
-      `${this.apiUrl}/${id}`,
-      {
-        headers: this.getHeaders()
-      }
-    );
-
-  }
-
-
-  // Search
-  searchCourses(title: string): Observable<{ courses: Course[] }> {
-
-    return this.http.get<{ courses: Course[] }>(
-      `${this.apiUrl}/search?title=${title}`,
-      {
-        headers: this.getHeaders()
-      }
-    );
-
-  }
-
-
-  // Create
-  createCourse(course: Course): Observable<any> {
-
-    return this.http.post<any>(
-      this.apiUrl,
-      course,
-      {
-        headers: this.getHeaders()
-      }
-    );
-
-  }
-
-
-  // Update
-  updateCourse(id: string, course: Course): Observable<any> {
-
-    return this.http.put<any>(
-      `${this.apiUrl}/${id}`,
-      course,
-      {
-        headers: this.getHeaders()
-      }
-    );
-
-  }
-
-
-  // Delete
-  deleteCourse(id: string): Observable<any> {
-
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-      {
-        headers: this.getHeaders()
-      }
-    );
-
-  }
-
-
-  // Enroll
-  enrollInCourse(courseId: string): Observable<any> {
-
-    return this.http.post<any>(
-      this.enrollUrl,
-      { courseId },
-      {
-        headers: this.getHeaders()
-      }
-    );
-
-  }
-
 }

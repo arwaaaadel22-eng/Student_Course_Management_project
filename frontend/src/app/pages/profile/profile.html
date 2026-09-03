@@ -65,13 +65,6 @@
       </div>
 
       <div class="info-item">
-        <span class="label">Student ID</span>
-        <span class="value">
-          {{ student.studentId }}
-        </span>
-      </div>
-
-      <div class="info-item">
         <span class="label">Email</span>
         <span class="value">
           {{ student.email }}
@@ -86,13 +79,6 @@
       </div>
 
       <div class="info-item">
-        <span class="label">GPA</span>
-        <span class="value">
-          {{ student.gpa }}
-        </span>
-      </div>
-
-      <div class="info-item">
         <span class="label">Role</span>
         <span class="value">
           {{ student.role }}
@@ -100,23 +86,9 @@
       </div>
 
       <div class="info-item">
-        <span class="label">Department</span>
-        <span class="value">
-          {{ student.department }}
-        </span>
-      </div>
-
-      <div class="info-item">
-        <span class="label">Level</span>
-        <span class="value">
-          {{ student.level }}
-        </span>
-      </div>
-
-      <div class="info-item">
         <span class="label">Phone</span>
         <span class="value">
-          {{ student.phone }}
+          {{ student.phone || 'Add phone (optional)' }}
         </span>
       </div>
 
@@ -145,19 +117,6 @@
 
       </div>
 
-
-      <!-- Student ID -->
-      <div class="form-group">
-
-        <label>Student ID</label>
-
-        <input
-          type="text"
-          name="studentId"
-          [(ngModel)]="editStudent.studentId"
-          disabled>
-
-      </div>
 
 
       <!-- Email -->
@@ -214,36 +173,6 @@
       </div>
 
 
-      <!-- Department -->
-      <div class="form-group">
-
-        <label>Department</label>
-
-        <input
-          type="text"
-          name="department"
-          [(ngModel)]="editStudent.department"
-          required
-          disabled>
-
-      </div>
-
-
-      <!-- Level -->
-      <div class="form-group">
-
-        <label>Level</label>
-
-        <input
-          type="text"
-          name="level"
-          [(ngModel)]="editStudent.level"
-          required
-          disabled>
-
-      </div>
-
-
       <!-- Phone -->
       <div class="form-group">
 
@@ -253,7 +182,7 @@
           type="tel"
           name="phone"
           [(ngModel)]="editStudent.phone"
-          placeholder="+20 100 000 0000">
+          placeholder="Add phone (optional)">
 
       </div>
 
@@ -273,10 +202,10 @@
         <button
           type="button"
           class="save-btn"
-          [disabled]="emailInput.invalid"
+          [disabled]="isSaving"
           (click)="saveProfile()">
 
-          Save Changes
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
 
         </button>
 

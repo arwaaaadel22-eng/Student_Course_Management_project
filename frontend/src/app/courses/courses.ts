@@ -34,11 +34,8 @@ export class Courses implements OnInit {
 
     this.coursesService.getCourses().subscribe({
 
-      next: (res) => {
-
-        console.log(res);
-
-        this.courses = res.courses;
+      next: (courses) => {
+        this.courses = courses;
 
         this.isLoading = false;
       },
@@ -71,9 +68,8 @@ export class Courses implements OnInit {
       .searchCourses(this.searchTerm)
       .subscribe({
 
-        next: (res) => {
-
-          this.courses = res.courses;
+        next: (courses) => {
+          this.courses = courses;
 
           this.isLoading = false;
         },
@@ -101,9 +97,8 @@ export class Courses implements OnInit {
       .getCourseById(course._id)
       .subscribe({
 
-        next: (res) => {
-
-          this.selectedCourse = res.course;
+        next: (course) => {
+          this.selectedCourse = course;
 
         },
 
@@ -120,37 +115,6 @@ export class Courses implements OnInit {
   closeCourseDetails(): void {
 
     this.selectedCourse = null;
-
-  }
-
-  // Enroll
-  enroll(courseId: string | undefined): void {
-
-    if (!courseId) {
-      return;
-    }
-
-    this.coursesService
-      .enrollInCourse(courseId)
-      .subscribe({
-
-        next: (res) => {
-
-          console.log(res);
-
-          alert('Enrolled successfully');
-
-        },
-
-        error: (err) => {
-
-          console.log(err);
-
-          alert('Error while enrolling');
-
-        }
-
-      });
 
   }
 

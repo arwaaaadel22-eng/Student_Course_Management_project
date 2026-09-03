@@ -20,6 +20,7 @@ const publicUser = (user) => ({
     lastName: user.lastName,
     email: user.email,
     age: user.age,
+    phone: user.phone,
     role: user.role,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
@@ -27,7 +28,7 @@ const publicUser = (user) => ({
 
 exports.register = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, password, age, role } = req.body || {}
+        const { firstName, lastName, email, password, age, phone, role } = req.body || {}
 
         if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({
@@ -53,6 +54,7 @@ exports.register = async (req, res, next) => {
             email: normalizedEmail,
             password: hashedPassword,
             age,
+            phone,
             role
         })
 

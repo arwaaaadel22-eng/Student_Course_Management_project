@@ -30,6 +30,10 @@
       <input id="register-age" type="number" name="age" [(ngModel)]="details.age"
              required min="16" max="100">
 
+      <label for="register-phone">Phone</label>
+      <input id="register-phone" type="tel" name="phone" [(ngModel)]="details.phone"
+             placeholder="Add phone (optional)" autocomplete="tel">
+
       <label for="register-password">Password</label>
       <input id="register-password" type="password" name="password" [(ngModel)]="details.password"
              required minlength="6" autocomplete="new-password">

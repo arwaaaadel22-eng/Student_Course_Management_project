@@ -1,18 +1,15 @@
 import { Component, OnInit } from '@angular/core';
+import { finalize } from 'rxjs';
 import { AuthService, AuthUser } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
 
 interface StudentProfile {
   fullName: string;
-  studentId: string;
   email: string;
   role: string;
   status: string;
-  department: string;
-  level: string;
   phone: string;
   age: number;
-  gpa: number;
 }
 
 @Component({
@@ -24,20 +21,17 @@ interface StudentProfile {
 export class Profile implements OnInit {
 
   isEditing = false;
+  isSaving = false;
   errorMessage = '';
   successMessage = '';
 
   student: StudentProfile = {
     fullName: localStorage.getItem('userName') || 'Ahmed',
-    studentId: 'STU-2026-001',
     email: 'ahmed@example.com',
     role: 'Student',
     status: 'Active Student',
-    department: 'Computer Science',
-    level: 'Level 3',
-    phone: '+20 100 000 0000',
-    age: 20,
-    gpa: 3.5
+    phone: '',
+    age: 0,
   };
 
   editStudent = { ...this.student };
@@ -48,6 +42,11 @@ export class Profile implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const cachedUser = this.authService.getUser();
+    if (cachedUser) {
+      this.applyUser(cachedUser);
+    }
+
     const userId = this.authService.getUserId();
     if (!userId) {
       return;
@@ -70,31 +69,46 @@ export class Profile implements OnInit {
   cancelEdit(): void {
     this.editStudent = { ...this.student };
     this.isEditing = false;
+    this.isSaving = false;
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
   saveProfile(): void {
     this.errorMessage = '';
     this.successMessage = '';
     if (!this.editStudent.email.includes('@')) {
+      this.errorMessage = 'Please enter a valid email address.';
       return;
     }
 
     const userId = this.authService.getUserId();
     if (!userId) {
+      this.errorMessage = 'Please sign in before saving your profile.';
+      return;
+    }
+
+    if (!this.authService.getToken()) {
+      this.errorMessage = 'Your session has expired. Please sign in again.';
       return;
     }
 
     const [firstName, ...lastNameParts] = this.editStudent.fullName.trim().split(/\s+/);
     const lastName = lastNameParts.join(' ');
     if (!firstName || !lastName) {
+      this.errorMessage = 'Please enter your first and last name.';
       return;
     }
 
+    this.isSaving = true;
     this.profileService.updateProfile(userId, {
       firstName,
       lastName,
-      age: this.editStudent.age
-    }).subscribe({
+      age: this.editStudent.age,
+      phone: this.editStudent.phone
+    }).pipe(
+      finalize(() => this.isSaving = false)
+    ).subscribe({
       next: user => {
         this.applyUser(user);
         this.isEditing = false;
@@ -102,7 +116,7 @@ export class Profile implements OnInit {
       },
       error: error => {
         console.error('Error updating profile:', error);
-        this.errorMessage = error.error?.message || 'Unable to update your profile.';
+        this.errorMessage = error.error?.message || error.message || 'Unable to update your profile.';
       }
     });
   }
@@ -112,14 +126,13 @@ export class Profile implements OnInit {
       ...this.student,
       fullName: `${user.firstName} ${user.lastName}`,
       email: user.email,
-      age: user.age || this.student.age,
-      role: user.role
+      age: user.age ?? this.student.age,
+      role: user.role,
+      phone: user.phone ?? this.student.phone
     };
     this.editStudent = { ...this.student };
     localStorage.setItem('userName', this.student.fullName);
     const token = this.authService.getToken();
-    if (token) {
-      this.authService.setAuth(token, user);
-    }
+    if (token) this.authService.setAuth(token, user);
   }
 }

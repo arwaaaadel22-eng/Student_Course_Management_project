@@ -38,6 +38,12 @@ const userSchema = new mongoose.Schema({
         max: [100, "age must be less than 100"]
     },
 
+    phone: {
+        type: String,
+        trim: true,
+        maxlength: [20, "phone must be less than 20 characters"]
+    },
+
     role: {
         type: String,
         enum: {

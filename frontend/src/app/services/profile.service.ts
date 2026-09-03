@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, throwError, timeout } from 'rxjs';
 import { AuthService, AuthUser } from './auth.service';
 
 interface ProfileResponse {
@@ -26,11 +26,18 @@ export class ProfileService {
 
   updateProfile(
     userId: string,
-    changes: Pick<AuthUser, 'firstName' | 'lastName' | 'age'>
+    changes: Pick<AuthUser, 'firstName' | 'lastName' | 'age' | 'phone'>
   ): Observable<AuthUser> {
+    if (!this.authService.getToken()) {
+      return throwError(() => new Error('Authentication token is missing. Please sign in again.'));
+    }
+
     return this.http.put<ProfileResponse>(`${this.apiUrl}/${userId}`, changes, {
       headers: this.authHeaders()
-    }).pipe(map(response => response.user));
+    }).pipe(
+      timeout(10000),
+      map(response => response.user)
+    );
   }
 
   private authHeaders(): HttpHeaders {

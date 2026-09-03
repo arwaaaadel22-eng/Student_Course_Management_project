@@ -14,7 +14,8 @@ export class Register {
     lastName: '',
     email: '',
     password: '',
-    age: 16
+    age: 16,
+    phone: ''
   };
   confirmPassword = '';
   isSubmitting = false;
@@ -33,7 +34,11 @@ export class Register {
     }
 
     this.isSubmitting = true;
-    this.authService.register(this.details).subscribe({
+    this.authService.register({
+      ...this.details,
+      age: Number(this.details.age),
+      phone: this.details.phone.trim()
+    }).subscribe({
       next: response => {
         this.authService.setAuth(response.token, response.user);
         this.router.navigate(['/courses']);

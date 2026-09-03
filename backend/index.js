@@ -22,7 +22,11 @@ if (JWT_SECRET) {
 }
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:4200",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}))
 
 app.get("/", (req, res) => {
     res.json({ success: true, message: "Student Course Management API is running" })

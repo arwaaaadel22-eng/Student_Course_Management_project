@@ -3,11 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface AuthUser {
-  id: string;
+  id?: string;
+  _id?: string;
   firstName: string;
   lastName: string;
   email: string;
   age?: number;
+  phone?: string;
   role: 'student' | 'admin';
 }
 
@@ -20,6 +22,7 @@ export interface RegisterRequest extends LoginRequest {
   firstName: string;
   lastName: string;
   age: number;
+  phone: string;
   role?: 'student' | 'admin';
 }
 
@@ -50,8 +53,12 @@ export class AuthService {
   }
 
   setAuth(token: string, user: AuthUser): void {
+    const normalizedUser = {
+      ...user,
+      id: user.id || user._id || this.getTokenUserId(token) || ''
+    };
     localStorage.setItem(this.tokenKey, token);
-    localStorage.setItem(this.userKey, JSON.stringify(user));
+    localStorage.setItem(this.userKey, JSON.stringify(normalizedUser));
   }
 
   getToken(): string | null {
@@ -67,7 +74,20 @@ export class AuthService {
   getUserId(): string | null {
     const user = this.getUser();
 
-    return user ? user.id : null;
+    return user?.id || user?._id || this.getTokenUserId(this.getToken());
+  }
+
+  private getTokenUserId(token: string | null): string | null {
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1])) as { id?: string };
+      return payload.id || null;
+    } catch {
+      return null;
+    }
   }
 
   logout(): void {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CoursesService } from '../services/courses';
 import { Course } from '../models/course.model';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-courses',
@@ -15,8 +16,16 @@ export class Courses implements OnInit {
   searchTerm: string = '';
   isLoading: boolean = true;
   errorMessage: string = '';
+  enrollingId: string | null = null;
 
-  constructor(private coursesService: CoursesService) {}
+  constructor(
+    private coursesService: CoursesService,
+    private notifications: NotificationService
+  ) {}
+
+  isFull(course: Course): boolean {
+    return course.enrolledCount !== undefined && course.enrolledCount >= course.capacity;
+  }
 
   ngOnInit(): void {
     this.getCourses();
@@ -87,18 +96,22 @@ export class Courses implements OnInit {
 
   // Enroll
   enroll(courseId: string | undefined): void {
-    if (!courseId) {
+    if (!courseId || this.enrollingId) {
       return;
     }
 
+    this.enrollingId = courseId;
     this.coursesService
       .enrollInCourse(courseId)
       .subscribe({
         next: (res) => {
-          alert(res?.message || 'Enrolled successfully');
+          this.notifications.success(res?.message || 'Enrolled successfully');
+          this.enrollingId = null;
+          this.getCourses();
         },
         error: (err) => {
-          alert(err.error?.message || 'Error while enrolling');
+          this.notifications.error(err.error?.message || 'Error while enrolling');
+          this.enrollingId = null;
         }
       });
   }

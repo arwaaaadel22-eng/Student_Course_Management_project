@@ -30,6 +30,10 @@ const enrollmentschema = new mongoose.Schema({
 
 }, { timestamps: true })
 
-enrollmentschema.index({ userId: 1, courseId: 1 })
+// Prevents duplicate concurrent active enrollments for the same user/course.
+enrollmentschema.index(
+    { userId: 1, courseId: 1 },
+    { unique: true, partialFilterExpression: { status: "active" } }
+)
 
 module.exports = mongoose.model("Enrollments", enrollmentschema)

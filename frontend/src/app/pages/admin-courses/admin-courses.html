@@ -75,8 +75,8 @@
           <button
             type="submit"
             class="primary-button"
-            [disabled]="courseForm.invalid">
-            {{ isEditing ? 'Update Course' : 'Create Course' }}
+            [disabled]="courseForm.invalid || isSubmitting">
+            {{ isSubmitting ? 'Saving…' : (isEditing ? 'Update Course' : 'Create Course') }}
           </button>
         </div>
       </form>

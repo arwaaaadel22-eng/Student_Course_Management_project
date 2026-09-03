@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { EnrollmentService } from '../services/enrolmentservice';
 import { IEnrollment } from '../models/enrollment.model';
+import { ConfirmService } from '../services/confirm.service';
 
 @Component({
   selector: 'app-my-courses',
@@ -14,7 +15,10 @@ export class MyCourses implements OnInit {
   errorMessage = '';
   cancellingId: string | null = null;
 
-  constructor(private enrollmentService: EnrollmentService) {}
+  constructor(
+    private enrollmentService: EnrollmentService,
+    private confirmService: ConfirmService
+  ) {}
 
   ngOnInit(): void {
     this.getEnrollments();
@@ -36,10 +40,13 @@ export class MyCourses implements OnInit {
     });
   }
 
-  cancelEnrollment(id: string): void {
+  async cancelEnrollment(id: string): Promise<void> {
     if (this.cancellingId) return;
 
-    const confirmed = confirm('Cancel this enrollment? This cannot be undone.');
+    const confirmed = await this.confirmService.confirm(
+      'Cancel this enrollment? This cannot be undone.',
+      'Cancel enrollment'
+    );
     if (!confirmed) return;
 
     this.cancellingId = id;

@@ -36,6 +36,12 @@ const courseschema = new mongoose.Schema({
         type: Number,
         required: [true, "capacity is required"],
         min: [1, "capacity must be at least 1"]
+    },
+
+    enrolledCount: {
+        type: Number,
+        default: 0,
+        min: 0
     }
 
 }, { timestamps: true })

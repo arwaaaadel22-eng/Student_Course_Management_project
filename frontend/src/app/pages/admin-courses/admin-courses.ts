@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CoursesService } from '../../services/courses';
 import { Course } from '../../models/course.model';
+import { NotificationService } from '../../services/notification.service';
+import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-admin-courses',
@@ -15,10 +17,13 @@ export class AdminCourses implements OnInit {
   courses: Course[] = [];
   selectedCourse: Course | null = null;
   isEditing: boolean = false;
+  isSubmitting: boolean = false;
 
   constructor(
     private fb: FormBuilder,
-    private coursesService: CoursesService
+    private coursesService: CoursesService,
+    private notifications: NotificationService,
+    private confirmService: ConfirmService
   ) {
     this.courseForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
@@ -41,18 +46,19 @@ export class AdminCourses implements OnInit {
         this.courses = res.courses || res;
       },
       error: (err: any) => {
-        alert(err.error?.message || 'Failed to fetch courses');
+        this.notifications.error(err.error?.message || 'Failed to fetch courses');
       }
     });
   }
 
   // Create / Update
   saveCourse(): void {
-    if (this.courseForm.invalid) {
+    if (this.courseForm.invalid || this.isSubmitting) {
       return;
     }
 
     const course: Course = this.courseForm.value;
+    this.isSubmitting = true;
 
     // Create
     if (!this.isEditing) {
@@ -60,12 +66,14 @@ export class AdminCourses implements OnInit {
         .createCourse(course)
         .subscribe({
           next: (res: any) => {
-            alert(res?.message || 'Course created successfully');
+            this.notifications.success(res?.message || 'Course created successfully');
             this.courseForm.reset();
+            this.isSubmitting = false;
             this.getCourses();
           },
           error: (err: any) => {
-            alert(err.error?.message || 'Error while creating course');
+            this.notifications.error(err.error?.message || 'Error while creating course');
+            this.isSubmitting = false;
           }
         });
       return;
@@ -77,16 +85,20 @@ export class AdminCourses implements OnInit {
         .updateCourse(this.selectedCourse._id, course)
         .subscribe({
           next: (res: any) => {
-            alert(res?.message || 'Course updated successfully');
+            this.notifications.success(res?.message || 'Course updated successfully');
             this.courseForm.reset();
             this.selectedCourse = null;
             this.isEditing = false;
+            this.isSubmitting = false;
             this.getCourses();
           },
           error: (err: any) => {
-            alert(err.error?.message || 'Error while updating course');
+            this.notifications.error(err.error?.message || 'Error while updating course');
+            this.isSubmitting = false;
           }
         });
+    } else {
+      this.isSubmitting = false;
     }
   }
 
@@ -106,13 +118,16 @@ export class AdminCourses implements OnInit {
   }
 
   // Delete
-  deleteCourse(id: string | undefined): void {
+  async deleteCourse(id: string | undefined): Promise<void> {
     if (!id) {
       return;
     }
 
-    const confirmDelete = confirm('Are you sure you want to delete this course?');
-    if (!confirmDelete) {
+    const confirmed = await this.confirmService.confirm(
+      'Are you sure you want to delete this course?',
+      'Delete'
+    );
+    if (!confirmed) {
       return;
     }
 
@@ -120,11 +135,11 @@ export class AdminCourses implements OnInit {
       .deleteCourse(id)
       .subscribe({
         next: (res: any) => {
-          alert(res?.message || 'Course deleted successfully');
+          this.notifications.success(res?.message || 'Course deleted successfully');
           this.getCourses();
         },
         error: (err: any) => {
-          alert(err.error?.message || 'Error while deleting course');
+          this.notifications.error(err.error?.message || 'Error while deleting course');
         }
       });
   }

@@ -6,4 +6,5 @@ export interface Course {
   duration: number;
   price: number;
   capacity: number;
+  enrolledCount?: number;
 }

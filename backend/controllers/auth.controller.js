@@ -2,6 +2,10 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const User = require("../models/user.model")
 
+// A pre-computed bcrypt hash with no matching plaintext, used to keep login
+// timing constant when the email doesn't match a real account.
+const DUMMY_HASH = "$2b$12$CwTycUXWue0Thq9StjUM0uJ8Y9V3f4v7cAeXPP6cyOKUANvrxV.HW"
+
 const createToken = (user) => {
     if (!process.env.JWT_SECRET) {
         throw new Error("JWT_SECRET is not configured")
@@ -83,9 +87,11 @@ exports.login = async (req, res, next) => {
         }
 
         const user = await User.findOne({ email: email.trim().toLowerCase() })
-        const passwordMatches = user && await bcrypt.compare(password, user.password)
+        // Always run a bcrypt compare, even for an unknown email, so response
+        // time doesn't reveal whether the account exists.
+        const passwordMatches = await bcrypt.compare(password, user ? user.password : DUMMY_HASH)
 
-        if (!passwordMatches) {
+        if (!user || !passwordMatches) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid email or password"

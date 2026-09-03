@@ -52,11 +52,11 @@
     <div *ngIf="user" class="nav-user">
 
       <div class="avatar">
-        {{ getInitials(user?.firstName || '', user?.lastName || '') }}
+        {{ getInitials(user.firstName, user.lastName) }}
       </div>
 
       <span class="user-name">
-        {{ user?.firstName }} {{ user?.lastName }}
+        {{ user.firstName }} {{ user.lastName }}
       </span>
 
       <button

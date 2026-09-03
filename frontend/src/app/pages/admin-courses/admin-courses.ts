@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CoursesService } from '../../services/courses';
 import { Course } from '../../models/course.model';
@@ -23,7 +23,8 @@ export class AdminCourses implements OnInit {
     private fb: FormBuilder,
     private coursesService: CoursesService,
     private notifications: NotificationService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private cdr: ChangeDetectorRef
   ) {
     this.courseForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
@@ -44,9 +45,11 @@ export class AdminCourses implements OnInit {
     this.coursesService.getCourses().subscribe({
       next: (res: any) => {
         this.courses = res.courses || res;
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.notifications.error(err.error?.message || 'Failed to fetch courses');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -70,10 +73,12 @@ export class AdminCourses implements OnInit {
             this.courseForm.reset();
             this.isSubmitting = false;
             this.getCourses();
+            this.cdr.markForCheck();
           },
           error: (err: any) => {
             this.notifications.error(err.error?.message || 'Error while creating course');
             this.isSubmitting = false;
+            this.cdr.markForCheck();
           }
         });
       return;
@@ -91,10 +96,12 @@ export class AdminCourses implements OnInit {
             this.isEditing = false;
             this.isSubmitting = false;
             this.getCourses();
+            this.cdr.markForCheck();
           },
           error: (err: any) => {
             this.notifications.error(err.error?.message || 'Error while updating course');
             this.isSubmitting = false;
+            this.cdr.markForCheck();
           }
         });
     } else {
@@ -137,9 +144,11 @@ export class AdminCourses implements OnInit {
         next: (res: any) => {
           this.notifications.success(res?.message || 'Course deleted successfully');
           this.getCourses();
+          this.cdr.markForCheck();
         },
         error: (err: any) => {
           this.notifications.error(err.error?.message || 'Error while deleting course');
+          this.cdr.markForCheck();
         }
       });
   }

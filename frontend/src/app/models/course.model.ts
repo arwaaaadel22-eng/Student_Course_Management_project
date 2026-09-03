@@ -6,7 +6,7 @@ export interface Course {
   instructor?: string;
   category?: string;
   price?: number;
-  duration?: string;
+  duration?: number | string;
   capacity?: number;
   enrolled?: number;
 }

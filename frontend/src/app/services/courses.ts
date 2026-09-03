@@ -1,34 +1,68 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
 import { Course } from '../models/course.model';
+import { AuthService } from './auth.service';
+
+interface CoursesResponse {
+  courses: Course[];
+}
+
+interface CourseResponse {
+  course: Course;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CoursesService {
-  private apiUrl = 'http://localhost:3000/api/courses';
-  private enrollUrl = 'http://localhost:3000/api/enrollments';
+  private readonly apiUrl = 'http://localhost:3000/courses';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private readonly http: HttpClient,
+    private readonly authService: AuthService
+  ) {}
 
-  // 1. جلب جميع الكورسات
   getCourses(): Observable<Course[]> {
-    return this.http.get<Course[]>(this.apiUrl);
+    return this.http.get<CoursesResponse>(this.apiUrl).pipe(
+      map(response => response.courses)
+    );
   }
 
-  // 2. جلب تفاصيل كورس معين عن طريق الـ ID
   getCourseById(id: string): Observable<Course> {
-    return this.http.get<Course>(`${this.apiUrl}/${id}`);
+    return this.http.get<CourseResponse>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.course)
+    );
   }
 
-  // 3. البحث في الكورسات من السيرفر (GET /courses/search)
   searchCourses(query: string): Observable<Course[]> {
-    return this.http.get<Course[]>(`${this.apiUrl}/search?q=${query}`);
+    return this.http.get<CoursesResponse>(
+      `${this.apiUrl}/search?title=${encodeURIComponent(query)}`
+    ).pipe(map(response => response.courses));
   }
 
-  // 4. طلب الانضمام للدورة (POST /enrollments)
-  enrollInCourse(courseId: string): Observable<any> {
-    return this.http.post<any>(this.enrollUrl, { courseId });
+  createCourse(course: Course): Observable<Course> {
+    return this.http.post<CourseResponse>(this.apiUrl, course, {
+      headers: this.authHeaders()
+    }).pipe(map(response => response.course));
+  }
+
+  updateCourse(id: string, course: Course): Observable<Course> {
+    return this.http.put<CourseResponse>(`${this.apiUrl}/${id}`, course, {
+      headers: this.authHeaders()
+    }).pipe(map(response => response.course));
+  }
+
+  deleteCourse(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
+      headers: this.authHeaders()
+    });
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
   }
 }

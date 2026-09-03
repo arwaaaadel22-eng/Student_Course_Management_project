@@ -24,8 +24,30 @@ exports.enroll = async (req, res, next) => {
             return res.status(409).json({ success: false, message: "Already enrolled in this course" })
         }
 
-        const enrollment = await Enrollment.create({ userId, courseId, status: "active" })
-        return res.status(201).json({ success: true, enrollment })
+        // Atomic capacity claim: only succeeds while enrolledCount < capacity,
+        // so concurrent requests can't oversell the course.
+        const reservedCourse = await Course.findOneAndUpdate(
+            { _id: courseId, $expr: { $lt: ["$enrolledCount", "$capacity"] } },
+            { $inc: { enrolledCount: 1 } },
+            { new: true }
+        )
+
+        if (!reservedCourse) {
+            return res.status(409).json({ success: false, message: "This course is full" })
+        }
+
+        try {
+            const enrollment = await Enrollment.create({ userId, courseId, status: "active" })
+            return res.status(201).json({ success: true, enrollment })
+        } catch (error) {
+            // Roll back the capacity claim if enrollment creation failed
+            // (e.g. unique-index race on a concurrent duplicate enrollment).
+            await Course.updateOne({ _id: courseId }, { $inc: { enrolledCount: -1 } })
+            if (error.code === 11000) {
+                return res.status(409).json({ success: false, message: "Already enrolled in this course" })
+            }
+            throw error
+        }
     } catch (error) {
         next(error)
     }
@@ -85,6 +107,10 @@ exports.cancelEnrollment = async (req, res, next) => {
 
         enrollment.status = "cancelled"
         await enrollment.save()
+        await Course.updateOne(
+            { _id: enrollment.courseId, enrolledCount: { $gt: 0 } },
+            { $inc: { enrolledCount: -1 } }
+        )
 
         return res.status(200).json({
             success: true,

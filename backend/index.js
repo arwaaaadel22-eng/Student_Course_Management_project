@@ -3,7 +3,9 @@ const express = require("express")
 const mongoose = require("mongoose")
 const dotenv = require("dotenv")
 const cors = require("cors")
+const helmet = require("helmet")
 const rateLimit = require("express-rate-limit")
+const sanitizeMiddleware = require("./middleware/sanitize.middleware")
 
 // Load environment configuration strictly from .env
 dotenv.config({ path: path.join(__dirname, ".env") })
@@ -21,7 +23,9 @@ const JWT_SECRET = process.env.JWT_SECRET
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:4200"
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_AUTH_MAX || 20)
 
+app.use(helmet())
 app.use(express.json({ limit: "10kb" }))
+app.use(sanitizeMiddleware)
 app.use(cors({
     origin: CORS_ORIGIN.includes(",") ? CORS_ORIGIN.split(",").map(o => o.trim()) : CORS_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

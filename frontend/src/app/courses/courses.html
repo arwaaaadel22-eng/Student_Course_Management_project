@@ -82,7 +82,8 @@
 
           <p>
             <strong>Capacity:</strong>
-            {{ course.capacity }}
+            {{ course.enrolledCount ?? 0 }} / {{ course.capacity }}
+            <span *ngIf="isFull(course)" class="badge text-bg-secondary ms-1">Full</span>
           </p>
 
           <div class="d-flex gap-2">
@@ -96,8 +97,9 @@
             <button
               class="btn btn-success"
               type="button"
+              [disabled]="isFull(course) || enrollingId === course._id"
               (click)="enroll(course._id)">
-              Enroll
+              {{ enrollingId === course._id ? 'Enrolling…' : (isFull(course) ? 'Full' : 'Enroll') }}
             </button>
           </div>
         </div>
@@ -160,7 +162,7 @@
 
         <p>
           <strong>Capacity:</strong>
-          {{ selectedCourse.capacity }}
+          {{ selectedCourse.enrolledCount ?? 0 }} / {{ selectedCourse.capacity }}
         </p>
       </div>
 
@@ -168,8 +170,9 @@
         <button
           class="btn btn-success"
           type="button"
+          [disabled]="isFull(selectedCourse) || enrollingId === selectedCourse._id"
           (click)="enroll(selectedCourse._id); closeCourseDetails()">
-          Enroll
+          {{ isFull(selectedCourse) ? 'Full' : 'Enroll' }}
         </button>
         <button
           type="button"

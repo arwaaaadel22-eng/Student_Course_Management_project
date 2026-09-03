@@ -104,16 +104,18 @@ exports.updateCourse = async (req, res, next) => {
     try {
         const { id } = req.params
         const { title, description, instructor, duration, price, capacity } = req.body
+
+        const updateData = {}
+        if (title !== undefined) updateData.title = title
+        if (description !== undefined) updateData.description = description
+        if (instructor !== undefined) updateData.instructor = instructor
+        if (duration !== undefined) updateData.duration = duration
+        if (price !== undefined) updateData.price = price
+        if (capacity !== undefined) updateData.capacity = capacity
+
         const course = await Course.findByIdAndUpdate(
             id,
-            {
-                title,
-                description,
-                instructor,
-                duration,
-                price,
-                capacity
-            },
+            updateData,
             {
                 new: true,
                 runValidators: true
